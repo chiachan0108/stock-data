@@ -84,12 +84,12 @@ if not st.session_state['scan_completed']:
     logic_html = """
     <div class="logic-grid">
         <div class="logic-item">
-            <div class="logic-index">01 / SCOPE</div><div class="logic-title">產業範圍</div>
-            <div class="logic-desc">鎖定上市櫃全體<span class="highlight">電子產業</span>標的。</div>
+            <div class="logic-index">01 / SCOPE</div><div class="logic-title">選股範圍</div>
+            <div class="logic-desc">鎖定台灣全體上市櫃<span class="highlight">電子產業</span>標的。</div>
         </div>
         <div class="logic-item">
             <div class="logic-index">02 / LIQUIDITY</div><div class="logic-title">流動性門檻</div>
-            <div class="logic-desc">近 20 日日均成交量需大於 <span class="highlight">1,000張</span>。</div>
+            <div class="logic-desc">近20日平均日成交量需大於 <span class="highlight">1,000張</span>。</div>
         </div>
         <div class="logic-item">
             <div class="logic-index">03 / LEVEL</div><div class="logic-title">技術位階</div>
@@ -97,23 +97,23 @@ if not st.session_state['scan_completed']:
         </div>
         <div class="logic-item">
             <div class="logic-index">04 / TREND</div><div class="logic-title">趨勢排列</div>
-            <div class="logic-desc"><span class="highlight">MA60 > MA240</span>，呈現長線多頭排列。</div>
+            <div class="logic-desc"><span class="highlight">MA60 > MA240</span>，呈現中長線多頭排列。</div>
         </div>
         <div class="logic-item">
             <div class="logic-index">05 / SCALE</div><div class="logic-title">營收規模</div>
-            <div class="logic-desc">12 個月累積營收 (<span class="highlight">LTM</span>) 創下 5 年來最高紀錄。</div>
+            <div class="logic-desc">近12個月累積營收 (<span class="highlight">LTM</span>) 創下5年來最高紀錄。</div>
         </div>
         <div class="logic-item">
             <div class="logic-index">06 / MOMENTUM</div><div class="logic-title">創高動能</div>
-            <div class="logic-desc">近 6 個月內至少有單月營收創下 <span class="highlight">歷史新高</span>。</div>
+            <div class="logic-desc">近6個月內至少有1個月以上的營收創下 <span class="highlight">歷史新高</span>。</div>
         </div>
         <div class="logic-item">
             <div class="logic-index">07 / DYNAMICS</div><div class="logic-title">季度動能</div>
-            <div class="logic-desc">確保 <span class="highlight">季 YoY > 0</span>，營運動能持續擴張。</div>
+            <div class="logic-desc">確保 <span class="highlight">近1季YoY > 0</span>，營運動能持續擴張。</div>
         </div>
         <div class="logic-item">
-            <div class="logic-index">08 / TRACKING</div><div class="logic-title">相對強弱</div>
-            <div class="logic-desc">同步法人籌碼並執行還原權值 <span class="highlight">0050</span> 績效比對。</div>
+            <div class="logic-index">08 / TRACKING</div><div class="logic-title">相對強弱判定</div>
+            <div class="logic-desc">更新三大法人籌碼並判定相對大盤強弱 <span class="highlight">0050</span> 績效比對。</div>
         </div>
     </div>
     """
@@ -129,7 +129,7 @@ if not st.session_state['scan_completed']:
                     (35, "📈 正在計算技術面均線位階型態..."),
                     (55, "🏭 正在檢索營收規模與歷史新高紀錄..."),
                     (75, "👥 正在同步法人近 5 日買賣超張數..."),
-                    (90, "⚖️ 正在執行 0050 還原績效強弱對標..."),
+                    (90, "⚖️ 正在執行相對大盤強弱判定..."),
                     (100, "🏆 正在產出精選量化報告...")
                 ]
                 for p, txt in steps:
