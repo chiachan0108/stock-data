@@ -7,7 +7,7 @@ import io
 # [核心配置：請修改為您的 GitHub 連結]
 # =============================================================================
 # 格式範例: https://raw.githubusercontent.com/您的帳號/儲存庫名/main/daily_result.csv
-RAW_URL = "https://raw.githubusercontent.com/您的帳號/stock-data/main/daily_result.csv"
+RAW_URL = "https://raw.githubusercontent.com/chiachan0108/stock-data/refs/heads/main/daily_result.csv"
 
 # =============================================================================
 # [1. 網頁版介面設定]
