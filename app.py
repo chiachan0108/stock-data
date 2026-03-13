@@ -137,22 +137,18 @@ if not st.session_state['scan_completed']:
                     status.write(txt)
                 
                 try:
-                    # 使用 requests 預抓取資料
                     r = requests.get(f"{RAW_URL}?t={int(time.time())}", timeout=10)
                     if r.status_code == 200:
                         df = pd.read_csv(io.StringIO(r.text), on_bad_lines='skip')
                         st.session_state['temp_df'] = df
                         st.session_state['scan_completed'] = True
                         status.update(label="✅ 分析完成", state="complete", expanded=False)
-                        st.balloons()
-                        st.rerun()
-                    else:
-                        st.error(f"GitHub 回傳錯誤碼: {r.status_code}")
+                        st.balloons(); st.rerun()
+                    else: st.error(f"GitHub 回傳錯誤碼: {r.status_code}")
                 except Exception as e:
-                    st.error(f"數據讀取失敗。這通常是網路延遲或檔案格式問題。詳細資訊：{str(e)}")
+                    st.error(f"數據讀取失敗：{str(e)}")
 
 else:
-    # --- 結果頁面 ---
     df = st.session_state['temp_df']
     update_date = df['更新日期'].iloc[0] if not df.empty and '更新日期' in df.columns else datetime.date.today()
     
@@ -166,13 +162,12 @@ else:
     st.subheader(f"🏆 QUANTUM TOP PICKS")
     
     if not df.empty:
-        # 色階渲染
         styled = df.style
         if '年乖離(%)' in df.columns: styled = styled.background_gradient(subset=['年乖離(%)'], cmap='RdYlGn_r')
-        if '近5日法人超(張)' in df.columns: styled = styled.background_gradient(subset=['近5日法人超(張)'], cmap='Greens')
+        # 💡 欄位渲染修正完成
+        if '近5日三大法人買賣超(張數)' in df.columns: styled = styled.background_gradient(subset=['近5日三大法人買賣超(張數)'], cmap='Greens')
         if '近一季相對大盤強弱' in df.columns: styled = styled.background_gradient(subset=['近一季相對大盤強弱'], cmap='RdYlGn')
 
-        # 💡 重點優化：營收 YoY 小數點第二位與百分比顯示
         st.dataframe(styled.format({
             "現價": "{:.2f}", 
             "季乖離(%)": "{:.2f}%", 
@@ -187,7 +182,7 @@ else:
     output = io.BytesIO()
     with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
         df.to_excel(writer, index=False)
-    st.sidebar.download_button("📥 下載 Excel 完整報告", output.getvalue(), file_name=f"Quant_Report_{update_date}.xlsx")
+    st.sidebar.download_button("📥 下載 Excel 完整報告", output.getvalue(), file_name=f"Quant_Report.xlsx")
 
 st.divider()
 st.caption("QUANTUM DATA SYSTEM © 2026 | Minimalist Design. Maximum Insight.")
