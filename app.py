@@ -121,7 +121,7 @@ if not st.session_state['scan_completed']:
 
     _, btn_col, _ = st.columns([1, 2, 1])
     with btn_col:
-        if st.button("🚀 啟動全量量化掃描系統", type="primary", use_container_width=True):
+        if st.button("🚀 啟動AI量化掃描系統", type="primary", use_container_width=True):
             p_bar = st.progress(0, text="📡 正在初始化系統終端...")
             with st.status("正在執行深度分析...", expanded=True) as status:
                 steps = [
