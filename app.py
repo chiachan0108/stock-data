@@ -113,7 +113,7 @@ if not st.session_state['scan_completed']:
         </div>
         <div class="logic-item">
             <div class="logic-index">08 / TRACKING</div><div class="logic-title">相對強弱判定</div>
-            <div class="logic-desc">更新三大法人籌碼並判定相對大盤強弱 <span class="highlight">0050</span> 績效比對。</div>
+            <div class="logic-desc">更新三大法人籌碼並 <span class="highlight">判定相對大盤強弱</span> 。</div>
         </div>
     </div>
     """
