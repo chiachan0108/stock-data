@@ -1,9 +1,9 @@
 import streamlit as st
 import pandas as pd
-import datetime, io, time
+import datetime, io, time, requests
 
 # =============================================================================
-# [配置區]
+# [配置區] - 請再次確認此網址在瀏覽器能直接打開
 # =============================================================================
 RAW_URL = "https://raw.githubusercontent.com/chiachan0108/stock-data/refs/heads/main/daily_result.csv"
 
@@ -15,23 +15,9 @@ st.set_page_config(page_title="台股電子量化智選系統", layout="wide", i
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=JetBrains+Mono:wght@500;700&display=swap');
-    
     html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
-    
-    /* 科技感卡片 */
-    .logic-card { 
-        background: rgba(255, 255, 255, 0.03); 
-        border-left: 3px solid #00f2ff; 
-        padding: 18px; 
-        border-radius: 10px; 
-        margin-bottom: 12px;
-        transition: 0.3s;
-    }
-    .logic-card:hover { background: rgba(0, 242, 255, 0.05); }
+    .logic-card { background: rgba(255, 255, 255, 0.03); border-left: 3px solid #00f2ff; padding: 18px; border-radius: 10px; margin-bottom: 12px; }
     .highlight { color: #ffde59; font-family: 'JetBrains Mono', monospace; font-weight: 700; }
-    
-    /* 下載按鈕美化 */
-    .stDownloadButton button { width: 100%; border-radius: 8px; }
     </style>
 """, unsafe_allow_html=True)
 
@@ -57,63 +43,85 @@ if not st.session_state['scan_completed']:
         """, unsafe_allow_html=True)
 
         if st.button("🚀 啟動全量量化掃描系統", type="primary", use_container_width=True):
-            # 設定 15 秒的模擬掃描儀式 (對應 Colab 的 8 大邏輯)
-            with st.status("📡 正在連接大數據終端...", expanded=True) as status:
-                time.sleep(2.0); status.write("🔍 正在過濾 900+ 檔電子股流動性...")
-                time.sleep(2.5); status.write("📈 正在掃描技術面位階 (MA60, MA240)...")
-                time.sleep(2.5); status.write("🏭 正在分析 LTM 累積營收與歷史新高紀錄...")
-                time.sleep(2.5); status.write("👥 正在同步近 5 日三大法人籌碼分點...")
-                time.sleep(2.5); status.write("⚖️ 正在執行 0050 還原權值績效對標...")
-                time.sleep(3.0); status.write("🏆 正在編譯最終精選報告...")
+            with st.status("📡 正在連接量化終端...", expanded=True) as status:
+                # 15 秒科技感儀式 (分 6 階段，每階段約 2.5 秒)
+                steps = [
+                    "🔍 正在過濾 900+ 檔電子股流動性數據...",
+                    "📈 正在分析還原均線位階 (MA60, MA240)...",
+                    "🏭 正在檢索 LTM 累積營收與歷史新高紀錄...",
+                    "👥 正在計算近 5 日三大法人籌碼分點...",
+                    "⚖️ 正在執行 0050 還原權值績效對標...",
+                    "🏆 正在編譯最終精選報告並同步 GitHub..."
+                ]
+                
+                for step in steps:
+                    time.sleep(2.5)
+                    status.write(step)
                 
                 try:
-                    # 讀取 Colab 傳上來的 CSV
-                    df = pd.read_csv(f"{RAW_URL}?nocache={datetime.datetime.now().timestamp()}")
-                    st.session_state['temp_df'] = df
-                    st.session_state['scan_completed'] = True
-                    status.update(label="✅ 量化任務掃描完成", state="complete", expanded=False)
-                    st.balloons()
-                    st.rerun()
-                except:
-                    st.error("數據同步失敗，請檢查 Colab 是否已成功推送 CSV。")
+                    # 強制加上 nocache 參數防止抓到舊資料
+                    timestamp = int(time.time())
+                    final_url = f"{RAW_URL}?v={timestamp}"
+                    
+                    # 讀取數據
+                    df = pd.read_csv(final_url)
+                    
+                    if df.empty:
+                        status.update(label="⚠️ 掃描完成，但今日無符合標的", state="error", expanded=True)
+                    else:
+                        st.session_state['temp_df'] = df
+                        st.session_state['scan_completed'] = True
+                        status.update(label="✅ 量化掃描結案", state="complete", expanded=False)
+                        st.balloons()
+                        st.rerun()
+                except Exception as e:
+                    status.update(label="❌ 數據同步失敗", state="error", expanded=True)
+                    st.error(f"詳細報表錯誤訊息: {str(e)}")
+                    st.info("請檢查 GitHub 檔案是否含有正確的欄位標題。")
 
 else:
     # 顯示結果頁面
     df = st.session_state['temp_df']
     update_date = df['更新日期'].iloc[0] if '更新日期' in df.columns else "2026-03-13"
     
-    # 頂部數據儀表板
     m1, m2, m3 = st.columns(3)
-    m1.metric("掃描樣本", "900+ 檔")
-    m2.metric("符合門檻", f"{len(df)} 檔")
-    m3.metric("更新日期", str(update_date))
+    m1.metric("今日掃描樣本", "900+ 檔")
+    m2.metric("符合門檻標的", f"{len(df)} 檔")
+    m3.metric("資料最後更新日期", str(update_date))
     
     st.sidebar.button("🔄 重新執行掃描", on_click=lambda: st.session_state.update({"scan_completed": False}))
     
-    st.subheader("🏆 QUANTUM TOP PICKS (依相對強弱排序)")
+    st.subheader(f"🏆 QUANTUM TOP PICKS (依相對強弱排序)")
     
-    # 修正色階：確保欄位名稱與 Colab 一致
-    styled = df.style.background_gradient(subset=['年乖離(%)'], cmap='RdYlGn_r')
-    if '近5日法人超(張)' in df.columns:
+    # 色階美化 - 增加容錯檢查
+    styled = df.style
+    cols = df.columns.tolist()
+    
+    if '年乖離(%)' in cols:
+        styled = styled.background_gradient(subset=['年乖離(%)'], cmap='RdYlGn_r')
+    if '近5日法人超(張)' in cols:
         styled = styled.background_gradient(subset=['近5日法人超(張)'], cmap='Greens')
-    if '近一季相對大盤強弱' in df.columns:
+    if '近一季相對大盤強弱' in cols:
         styled = styled.background_gradient(subset=['近一季相對大盤強弱'], cmap='RdYlGn')
 
-    # 數據格式化顯示
-    st.dataframe(styled.format({
-        "現價": "{:.2f}", 
-        "季乖離(%)": "{:.2f}%", 
-        "年乖離(%)": "{:.2f}%", 
-        "近一季相對大盤強弱": "{:+.2f}%", # 顯示正負號，體現強弱
-        "營收YoY(%)": "{:.2f}%", 
+    # 定義格式化字典 (只針對存在的欄位)
+    format_dict = {
+        "現價": "{:.2f}",
+        "季乖離(%)": "{:.2f}%",
+        "年乖離(%)": "{:.2f}%",
+        "近一季相對大盤強弱": "{:+.2f}%",
+        "營收YoY(%)": "{:.2f}%",
         "營收MoM(%)": "{:.2f}%"
-    }), use_container_width=True)
+    }
+    # 過濾掉不存在於 df 中的欄位
+    active_formats = {k: v for k, v in format_dict.items() if k in cols}
+
+    st.dataframe(styled.format(active_formats), use_container_width=True)
     
-    # 下載按鈕
     output = io.BytesIO()
     with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
         df.to_excel(writer, index=False)
-    st.sidebar.download_button("📥 下載 Excel 報告", output.getvalue(), file_name=f"Quant_Report_{update_date}.xlsx")
+    st.sidebar.download_button("📥 下載 Excel 專業報告", output.getvalue(), file_name=f"Quant_Report_{update_date}.xlsx")
 
 st.divider()
-st.caption("QUANTUM DATA ENGINE © 2026 | 深度量化，精準決策。")
+st.caption("QUANTUM DATA ENGINE © 2026 | 數據驅動策略，精準掌握趨勢。")
