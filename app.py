@@ -2,12 +2,11 @@ import streamlit as st
 import pandas as pd
 import datetime
 import io
-import time  # 用於模擬讀取時間，增加儀式感
+import time  # 用於精確控制儀式感時間
 
 # =============================================================================
 # [核心配置：GitHub 數據來源]
 # =============================================================================
-# 請確認此連結的中間是您的 GitHub 帳號，且儲存庫與檔名皆正確
 RAW_URL = "https://raw.githubusercontent.com/chiachan0108/stock-data/refs/heads/main/daily_result.csv"
 
 # =============================================================================
@@ -15,111 +14,98 @@ RAW_URL = "https://raw.githubusercontent.com/chiachan0108/stock-data/refs/heads/
 # =============================================================================
 st.set_page_config(page_title="台股電子量化智選系統", layout="wide", initial_sidebar_state="collapsed")
 
-# 初始化 session_state，用於控制畫面顯示
+# 初始化 session_state
 if 'scan_completed' not in st.session_state:
     st.session_state['scan_completed'] = False
-if 'temp_df' not in st.session_state:
-    st.session_state['temp_df'] = None
 
 # =============================================================================
 # [2. 主介面設計]
 # =============================================================================
 
-# 設定具科技感的標題與頁首
-st.title("🛡️ 台股電子產業：量化趨勢掃描儀")
+# 頂部導航與標題
+st.title("🛡️ QUANTUM TECH STOCK SCANNER")
+st.caption("台股電子產業：大數據深度量化過濾引擎")
 st.markdown("---")
 
-# 判斷目前應該顯示首頁還是結果頁
+# 判斷顯示邏輯
 if not st.session_state['scan_completed']:
-    # --- 1. 專業科技感首頁 ---
+    # --- 時尚簡約首頁 ---
     
-    # 建立兩欄式佈局，左邊放文字與按鈕，右邊放科技圖
-    col1, col2 = st.columns([2, 1])
+    # 使用居中的佈局呈現科技感
+    _, center_col, _ = st.columns([1, 4, 1])
     
-    with col1:
-        st.subheader("歡迎使用 AI 量化選股系統")
+    with center_col:
+        st.subheader("系統運作邏輯說明")
         st.write("""
-        本系統整合了 **FinMind API** 與 **Yahoo Finance** 的大數據運算，
-        專注於篩選電子產業中具備以下特質的標的：
-        
-        - 📈 **趨勢強勁**：股價站穩年線 (MA240)，且季線 (MA60) 與年線呈多頭排列。
-        - 💰 **營運動能**：累積營收創 5 年新高，且具備單月營收創歷史新高的爆發力。
-        - 🏢 **法人認養**：即時追蹤近 5 個交易日三大法人籌碼合計買賣超動向。
+        本引擎專為電子產業設計，透過多重漏斗模型篩選出同時具備 **『趨勢、營收、籌碼』** 三位一體的強勢個股。
+        掃描過程將即時連接數據中心，並逐一執行您的量化過濾條件。
         """)
         
-        st.info("💡 提示：本系統將秒速讀取已在 Colab 完成結案的數據，不再重複消耗您的 API 額度。")
-        
-        # 儀式感核心：大型醒目的啟動按鈕
-        st.markdown("###") # 增加一些垂直間距
-        if st.button("🚀 啟動全量量化掃描", type="primary", use_container_width=True):
+        # 使用 Expander 隱藏細節，保持簡約
+        with st.expander("查看 8 大核心量化標準"):
+            st.markdown("""
+            1. **產業範圍**：鎖定上市櫃全體電子產業標的。
+            2. **流動性門檻**：近 20 日日均成交量大於 1,000 張。
+            3. **技術位階**：股價站穩年線 (MA240)。
+            4. **技術趨勢**：季線 (MA60) 高於年線，呈多頭排列。
+            5. **營收規模**：12 個月累積營收 (LTM) 創下 5 年新高。
+            6. **創高動能**：近 6 個月內有單月營收創下歷史新高。
+            7. **季度動能**：近 3 個月營收總和高於去年同期 (季 YoY > 0)。
+            8. **籌碼監控**：即時統計近 5 個交易日三大法人合計買賣超。
+            """)
+
+        st.write("")
+        # 啟動按鈕
+        if st.button("🚀 執行全量量化掃描", type="primary", use_container_width=True):
             
-            # --- 儀式感核心：模擬 10 秒的大數據掃描進度 ---
-            with st.status("📡 正在與 FinMind 伺服器建立加密連線...", expanded=True) as status:
-                time.sleep(1.0)
-                status.write("📊 正在下載台股電子全產業技術面數據 (900+ 標的)...")
+            # --- 儀式感核心：總計約 15 秒的模擬掃描 ---
+            with st.status("📡 正在啟動數據掃描引擎...", expanded=True) as status:
                 time.sleep(2.0)
-                status.write("🧬 正在執行漏斗篩選：現價 > MA240、MA60 > MA240...")
+                status.write("📍 Step 1: 正在篩選電子產業流動性標的 (Volume > 1,000)...")
                 time.sleep(2.0)
-                status.write("🏭 正在計算 LTM 營收動能與創歷史新高邏輯...")
-                time.sleep(1.5)
-                status.write("👥 正在同步近 5 日三大法人合計買賣超張數...")
-                time.sleep(1.5)
-                status.write("🏆 正在彙整綜合評分與產出最終精選名單...")
-                time.sleep(1.0)
+                status.write("📈 Step 2: 正在計算 900+ 標的之年線 (MA240) 支撐力道...")
+                time.sleep(2.0)
+                status.write("📊 Step 3: 正在驗證季線與年線之多頭排列形態...")
+                time.sleep(2.0)
+                status.write("🏭 Step 4: 正在計算滾動 12 個月 (LTM) 累積營收規模...")
+                time.sleep(2.0)
+                status.write("💥 Step 5: 正在檢索歷史月營收記錄，比對歷史新高標的...")
+                time.sleep(2.0)
+                status.write("👥 Step 6: 正在計算近 5 日三大法人合計買賣超數據...")
+                time.sleep(3.0) # 最後的綜合運算時間稍長
                 
-                # 實際抓取數據
                 try:
-                    # 加上 timestamp 避免瀏覽器抓到舊資料
                     df_raw = pd.read_csv(f"{RAW_URL}?nocache={datetime.datetime.now().timestamp()}")
                     st.session_state['temp_df'] = df_raw
                     st.session_state['scan_completed'] = True
-                    
-                    # 更新狀態並重新整理畫面
-                    status.update(label="✅ 量化掃描任務完成！", state="complete", expanded=False)
-                    st.balloons() # 噴出氣球增加儀式感與慶祝感
-                    st.rerun() # 重新整理以顯示數據表格
-                    
+                    status.update(label="✅ 掃描任務結案：已產出今日最優選名單", state="complete", expanded=False)
+                    st.balloons()
+                    st.rerun()
                 except Exception as e:
-                    status.update(label="❌ 連線失敗", state="error", expanded=True)
-                    st.error(f"無法讀取數據。錯誤訊息: {e}")
-                    st.info(f"請確認 Colab 是否已成功推送 `daily_result.csv` 至 GitHub，且連結 `{RAW_URL}` 是正確的。")
-
-    with col2:
-        # 在右側放置一張專業、具科技感的插圖
-        st.image("https://img.freepik.com/free-vector/digital-global-stock-market-financial-chart-concept-abstract-background_1017-31652.jpg", caption="Quant Data Analysis Engine", use_column_width=True)
+                    status.update(label="❌ 數據讀取失敗", state="error", expanded=True)
+                    st.error(f"GitHub 連線異常: {e}")
 
 else:
-    # --- 2. 專業結果顯示頁面 ---
-    
+    # --- 結果顯示頁面 ---
     df = st.session_state['temp_df']
+    update_date = df['更新日期'].iloc[0] if '更新日期' in df.columns else datetime.date.today()
     
-    # 從 CSV 中取得 Colab 的更新日期
-    update_date = df['更新日期'].iloc[0] if '更新日期' in df.columns else datetime.date.today().strftime('%Y-%m-%d')
-    
-    # 側邊欄控制
-    st.sidebar.header("⚙️ 篩選控制")
-    if st.sidebar.button("🔄 重新掃描"):
-        st.session_state['scan_completed'] = False
-        st.rerun()
-        
-    # 顯示成功總結區
-    st.success(f"🎊 掃描完畢！今日共有 **{len(df)}** 檔標的符合量化趨勢篩選門檻。 (更新日期：{update_date})")
-    
-    # 數據表格顯示與視覺化美化
-    st.subheader(f"🏆 台股電子產業：精選多頭清單 ({update_date})")
-    
-    # 自動找出需要設定色階的欄位，防止因為欄位微差導致崩潰
-    bias_cols = [c for c in df.columns if '乖離' in c]
-    inst_col = [c for c in df.columns if '法人超' in c]
-    
-    # 設定表格樣式：年乖離色階（紅漲綠跌）、法人色階（綠色買超）
-    styled_df = df.style
-    if bias_cols:
-        styled_df = styled_df.background_gradient(subset=[bias_cols[-1]], cmap='RdYlGn_r')
-    if inst_col:
-        styled_df = styled_df.background_gradient(subset=[inst_col[-1]], cmap='Greens')
+    # 頂部數據摘要
+    c1, c2, c3 = st.columns(3)
+    c1.metric("今日掃描標的", "900+ 檔")
+    c2.metric("通過量化門檻", f"{len(df)} 檔")
+    c3.metric("資料更新日期", f"{update_date}")
 
-    # 顯示表格並設定百分比格式
+    # 顯示結果
+    st.subheader("🏆 量化精選多頭清單")
+    
+    # 自動色階處理
+    styled_df = df.style
+    if '年乖離(%)' in df.columns:
+        styled_df = styled_df.background_gradient(subset=['年乖離(%)'], cmap='RdYlGn_r')
+    if '近5日法人超(張)' in df.columns:
+        styled_df = styled_df.background_gradient(subset=['近5日法人超(張)'], cmap='Greens')
+
     st.dataframe(styled_df.format({
         "現價": "{:.2f}",
         "季乖離(%)": "{:.2f}%",
@@ -128,27 +114,17 @@ else:
         "營收MoM(%)": "{:.2f}%"
     }), use_container_width=True)
 
-    # 專業 Excel 報告下載按鈕
+    # 側邊欄放重設按鈕與下載
+    st.sidebar.header("選項")
+    if st.sidebar.button("🔄 重新啟動掃描"):
+        st.session_state['scan_completed'] = False
+        st.rerun()
+    
     output = io.BytesIO()
     with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
         df.to_excel(writer, index=False, sheet_name='精選名單')
-        
-        # 獲取 xlsxwriter 物件進行進階美化
-        workbook  = writer.book
-        worksheet = writer.sheets['精選名單']
-        header_fmt = workbook.add_format({'bold': True, 'font_color': 'white', 'bg_color': '#1F4E78'})
-        
-        for col_num, value in enumerate(df.columns.values):
-            worksheet.write(0, col_num, value, header_fmt)
-            worksheet.set_column(col_num, col_num, 15)
-            
-    st.sidebar.download_button(
-        label="📥 下載完整 Excel 報告",
-        data=output.getvalue(),
-        file_name=f"台股選股報告_{update_date}.xlsx",
-        mime="application/vnd.ms-excel"
-    )
+    st.sidebar.download_button("📥 下載專業報告 (Excel)", data=output.getvalue(), file_name=f"Quant_Report_{update_date}.xlsx")
 
 # 頁尾
 st.divider()
-st.caption("聲明：本數據僅供量化研究與策略教學參考，不構成任何投資建議。投資人應獨立判斷並自負風險。")
+st.caption("Quant Data System © 2026. Designed for Electronic Sector Trend Analysis.")
