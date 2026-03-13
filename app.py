@@ -96,7 +96,7 @@ if 'scan_completed' not in st.session_state:
 # =============================================================================
 
 st.markdown('<h1 class="main-title">🛡️ QUANTUM SCANNER</h1>', unsafe_allow_html=True)
-st.caption("台股電子全產業：深度量化與還原權值績效監控")
+st.caption("台股電子全產業：優質量化選股")
 st.markdown("---")
 
 if not st.session_state['scan_completed']:
@@ -113,36 +113,36 @@ if not st.session_state['scan_completed']:
         <div class="logic-item">
             <div class="logic-index">02 / LIQUIDITY</div>
             <div class="logic-title">流動性門檻</div>
-            <div class="logic-desc">近 20 日日均成交量需大於 <span class="highlight">1,000張</span>，確保流動性無虞。</div>
+            <div class="logic-desc">近 20 日平均日成交量需大於 <span class="highlight">1,000張</span>，確保流動性無虞。</div>
         </div>
         <div class="logic-item">
             <div class="logic-index">03 / LEVEL</div>
             <div class="logic-title">技術位階</div>
-            <div class="logic-desc">現價必須站穩長線生命線 <span class="highlight">MA240</span> (年線) 之上。</div>
+            <div class="logic-desc">股價必須站穩長線生命線 <span class="highlight">MA240</span> (年線) 之上。</div>
         </div>
         <div class="logic-item">
             <div class="logic-index">04 / TREND</div>
             <div class="logic-title">趨勢排列</div>
-            <div class="logic-desc"><span class="highlight">季線 (MA60)</span> 高於年線，確保多頭排列發散態勢。</div>
+            <div class="logic-desc"><span class="highlight">季線 (MA60)</span> 大於年線，確保多頭排列發散態勢。</div>
         </div>
         <div class="logic-item">
             <div class="logic-index">05 / SCALE</div>
             <div class="logic-title">營收規模</div>
-            <div class="logic-desc">12 個月累積營收 (<span class="highlight">LTM</span>) 創下過去 5 年來新高點。</div>
+            <div class="logic-desc">近12 個月累積營收 (<span class="highlight">LTM</span>) 創下過去 5 年來最大值。</div>
         </div>
         <div class="logic-item">
             <div class="logic-index">06 / MOMENTUM</div>
             <div class="logic-title">爆發動能</div>
-            <div class="logic-desc">近 6 個月內至少有單月營收創下 <span class="highlight">歷史新高</span> 紀錄。</div>
+            <div class="logic-desc">近 6 個月內至少有1月以上之營收創下 <span class="highlight">歷史新高</span> 紀錄。</div>
         </div>
         <div class="logic-item">
             <div class="logic-index">07 / DYNAMICS</div>
             <div class="logic-title">季度動能</div>
-            <div class="logic-desc">近 3 個月營收總和高於去年同期，確保 <span class="highlight">季 YoY > 0</span>。</div>
+            <div class="logic-desc">近 3 個月營收總和高於去年同期累積營收，確保 <span class="highlight">季 YoY > 0</span>。</div>
         </div>
         <div class="logic-item">
             <div class="logic-index">08 / TRACKING</div>
-            <div class="logic-title">籌碼與對標</div>
+            <div class="logic-title">籌碼與相對強弱</div>
             <div class="logic-desc">同步<span class="highlight">法人籌碼</span>數據並執行還原權值 0050 績效對比。</div>
         </div>
     </div>
@@ -152,18 +152,18 @@ if not st.session_state['scan_completed']:
     _, btn_col, _ = st.columns([1, 2, 1])
     with btn_col:
         st.markdown("<br>", unsafe_allow_html=True)
-        if st.button("🚀 啟動全量量化掃描系統", type="primary", use_container_width=True):
+        if st.button("🚀 啟動量化掃描系統", type="primary", use_container_width=True):
             
             # 百分比進度條儀式
             p_bar = st.progress(0, text="📡 正在初始化系統終端...")
             
-            with st.status("正在執行深度分析...", expanded=True) as status:
+            with st.status("正在執行深度分析篩選...", expanded=True) as status:
                 process_steps = [
                     (15, "🔍 正在過濾電子產業標的與流動性數據..."),
-                    (35, "📈 正在計算還原均線位階與多頭排列型態..."),
-                    (55, "🏭 正在檢索 LTM 累積營收與歷史新高標的..."),
+                    (35, "📈 正在計算股價位階與多頭排列型態..."),
+                    (55, "🏭 正在檢索滾式累積年營收與月營收歷史新高標的..."),
                     (75, "👥 正在同步三大法人近 5 日買賣超張數..."),
-                    (90, "⚖️ 正在執行 0050 還原權值績效強弱對標..."),
+                    (90, "⚖️ 正在執行 0050 還原權值績效相對強弱..."),
                     (100, "🏆 正在產出最終精選量化報告...")
                 ]
                 
