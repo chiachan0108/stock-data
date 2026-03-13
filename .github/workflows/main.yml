@@ -2,8 +2,9 @@ name: Daily Stock Scan
 
 on:
   schedule:
-    - cron: '55 11 * * *' # 這是 UTC 時間，等於台北時間 19:55
-  workflow_dispatch:      # 讓你可以手動按按鈕測試
+    # 台北時間 19:55 = UTC 11:55
+    - cron: '55 11 * * *'
+  workflow_dispatch:
 
 jobs:
   run-scanner:
@@ -16,6 +17,18 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: '3.10'
+
+      # 💡 新增：快取機制，賦予機器人「長期記憶」
+      - name: Cache Stock Data
+        uses: actions/cache@v3
+        with:
+          # 指向 scanner.py 裡設定的緩存資料夾
+          path: ./data/cache
+          # 使用 run_id 確保每次執行都會存成新的快取
+          key: stock-cache-${{ runner.os }}-${{ github.run_id }}
+          # 關鍵：優先找回「最新一次」成功的快取
+          restore-keys: |
+            stock-cache-${{ runner.os }}-
 
       - name: Install Dependencies
         run: |
