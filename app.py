@@ -14,7 +14,7 @@ st.set_page_config(page_title="QUANTUM TECH SCANNER", layout="wide", initial_sid
 
 st.markdown("""
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=JetBrains+Mono:wght@400;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400;700&display=swap');
     
     html, body, [class*="css"] { 
         font-family: 'Inter', sans-serif; 
@@ -25,45 +25,66 @@ st.markdown("""
     .main-title {
         font-family: 'JetBrains Mono', monospace;
         font-weight: 700;
-        letter-spacing: -1px;
+        letter-spacing: -1.5px;
         color: #ffffff;
+        font-size: 3rem;
     }
 
-    /* 8道邏輯卡片設計 */
+    /* 8道邏輯卡片 - 字體強化版 */
     .logic-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-        gap: 12px;
-        margin-bottom: 25px;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 16px;
+        margin-bottom: 30px;
     }
 
     .logic-item {
-        background: rgba(255, 255, 255, 0.02);
-        border: 1px solid rgba(0, 242, 255, 0.1);
-        border-radius: 12px;
-        padding: 20px;
-        transition: all 0.4s ease;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(0, 242, 255, 0.15);
+        border-radius: 14px;
+        padding: 24px;
+        transition: all 0.4s ease-in-out;
     }
 
     .logic-item:hover {
-        background: rgba(0, 242, 255, 0.05);
-        border-color: rgba(0, 242, 255, 0.5);
+        background: rgba(0, 242, 255, 0.06);
+        border-color: rgba(0, 242, 255, 0.6);
+        transform: translateY(-5px);
     }
 
     .logic-index {
         font-family: 'JetBrains Mono', monospace;
-        font-size: 0.75rem;
+        font-size: 1rem; /* 放大 */
         color: #00f2ff;
         font-weight: 700;
-        margin-bottom: 8px;
+        margin-bottom: 12px;
+        letter-spacing: 2px;
     }
 
-    .logic-title { font-size: 1rem; font-weight: 600; color: #ffffff; margin-bottom: 10px; }
-    .logic-desc { font-size: 0.85rem; color: #888888; line-height: 1.5; }
-    .highlight { color: #00f2ff; font-weight: 600; }
+    .logic-title { 
+        font-size: 1.35rem; /* 標題大幅放大 */
+        font-weight: 700; 
+        color: #ffffff; 
+        margin-bottom: 14px; 
+        letter-spacing: -0.5px;
+    }
+
+    .logic-desc { 
+        font-size: 1.05rem; /* 說明文字放大 */
+        color: #a0a0a0; 
+        line-height: 1.6; /* 增加行距增加閱讀舒適度 */
+    }
+
+    .highlight { 
+        color: #00f2ff; 
+        font-weight: 700; 
+    }
     
-    /* 進度條顏色優化 */
-    .stProgress > div > div > div > div { background: linear-gradient(to right, #00f2ff, #0072ff); }
+    /* 進度條樣式 */
+    .stProgress > div > div > div > div { 
+        background: linear-gradient(to right, #00f2ff, #0072ff); 
+        height: 8px;
+    }
     </style>
 """, unsafe_allow_html=True)
 
@@ -81,45 +102,77 @@ st.markdown("---")
 if not st.session_state['scan_completed']:
     st.markdown("### 系統核心邏輯 | SYSTEM ARCHITECTURE")
     
-    # 8 道獨立邏輯展示
+    # 8 道獨立邏輯展示 (字體強化版)
     logic_html = """
     <div class="logic-grid">
-        <div class="logic-item"><div class="logic-index">01</div><div class="logic-title">產業範圍</div><div class="logic-desc">鎖定上市櫃全體<span class="highlight">電子產業</span>標的。</div></div>
-        <div class="logic-item"><div class="logic-index">02</div><div class="logic-title">流動性</div><div class="logic-desc">近 20 日日均成交量 > <span class="highlight">1,000張</span>。</div></div>
-        <div class="logic-item"><div class="logic-index">03</div><div class="logic-title">技術位階</div><div class="logic-desc">股價站穩長線支撐 <span class="highlight">MA240</span> 之上。</div></div>
-        <div class="logic-item"><div class="logic-index">04</div><div class="logic-title">趨勢排列</div><div class="logic-desc"><span class="highlight">MA60 > MA240</span>，多頭排列發散。</div></div>
-        <div class="logic-item"><div class="logic-index">05</div><div class="logic-title">營收規模</div><div class="logic-desc">累積營收 (<span class="highlight">LTM</span>) 創下 5 年來新高。</div></div>
-        <div class="logic-item"><div class="logic-index">06</div><div class="logic-title">爆發力</div><div class="logic-desc">近 6 個月有單月營收創下 <span class="highlight">歷史新高</span>。</div></div>
-        <div class="logic-item"><div class="logic-index">07</div><div class="logic-title">季度動能</div><div class="logic-desc">確保 <span class="highlight">季 YoY > 0</span>，動能持續擴張。</div></div>
-        <div class="logic-item"><div class="logic-index">08</div><div class="logic-title">相對強弱</div><div class="logic-desc">計算與 <span class="highlight">0050</span> 之還原權值績效對標。</div></div>
+        <div class="logic-item">
+            <div class="logic-index">01 / SCOPE</div>
+            <div class="logic-title">產業範圍</div>
+            <div class="logic-desc">鎖定上市櫃全體<span class="highlight">電子產業</span>，排除權證與非典型標的。</div>
+        </div>
+        <div class="logic-item">
+            <div class="logic-index">02 / LIQUIDITY</div>
+            <div class="logic-title">流動性門檻</div>
+            <div class="logic-desc">近 20 日日均成交量需大於 <span class="highlight">1,000張</span>，確保流動性無虞。</div>
+        </div>
+        <div class="logic-item">
+            <div class="logic-index">03 / LEVEL</div>
+            <div class="logic-title">技術位階</div>
+            <div class="logic-desc">現價必須站穩長線生命線 <span class="highlight">MA240</span> (年線) 之上。</div>
+        </div>
+        <div class="logic-item">
+            <div class="logic-index">04 / TREND</div>
+            <div class="logic-title">趨勢排列</div>
+            <div class="logic-desc"><span class="highlight">季線 (MA60)</span> 高於年線，確保多頭排列發散態勢。</div>
+        </div>
+        <div class="logic-item">
+            <div class="logic-index">05 / SCALE</div>
+            <div class="logic-title">營收規模</div>
+            <div class="logic-desc">12 個月累積營收 (<span class="highlight">LTM</span>) 創下過去 5 年來新高點。</div>
+        </div>
+        <div class="logic-item">
+            <div class="logic-index">06 / MOMENTUM</div>
+            <div class="logic-title">爆發動能</div>
+            <div class="logic-desc">近 6 個月內至少有單月營收創下 <span class="highlight">歷史新高</span> 紀錄。</div>
+        </div>
+        <div class="logic-item">
+            <div class="logic-index">07 / DYNAMICS</div>
+            <div class="logic-title">季度動能</div>
+            <div class="logic-desc">近 3 個月營收總和高於去年同期，確保 <span class="highlight">季 YoY > 0</span>。</div>
+        </div>
+        <div class="logic-item">
+            <div class="logic-index">08 / TRACKING</div>
+            <div class="logic-title">籌碼與對標</div>
+            <div class="logic-desc">同步<span class="highlight">法人籌碼</span>數據並執行還原權值 0050 績效對比。</div>
+        </div>
     </div>
     """
     st.markdown(logic_html, unsafe_allow_html=True)
 
     _, btn_col, _ = st.columns([1, 2, 1])
     with btn_col:
+        st.markdown("<br>", unsafe_allow_html=True)
         if st.button("🚀 啟動全量量化掃描系統", type="primary", use_container_width=True):
             
-            # --- 儀式感：進度條與百分比 ---
-            p_bar = st.progress(0, text="📡 正在初始化系統...")
+            # 百分比進度條儀式
+            p_bar = st.progress(0, text="📡 正在初始化系統終端...")
             
             with st.status("正在執行深度分析...", expanded=True) as status:
                 process_steps = [
-                    (15, "🔍 正在過濾電子產業標的與流動性..."),
-                    (35, "📈 正在計算技術面均線位階排列..."),
-                    (55, "🏭 正在檢索 LTM 營收與創歷史新高標的..."),
-                    (75, "👥 正在同步三大法人籌碼分點張數..."),
-                    (90, "⚖️ 正在執行 0050 還原權值績效對標..."),
-                    (100, "🏆 正在產出最終精選報告...")
+                    (15, "🔍 正在過濾電子產業標的與流動性數據..."),
+                    (35, "📈 正在計算還原均線位階與多頭排列型態..."),
+                    (55, "🏭 正在檢索 LTM 累積營收與歷史新高標的..."),
+                    (75, "👥 正在同步三大法人近 5 日買賣超張數..."),
+                    (90, "⚖️ 正在執行 0050 還原權值績效強弱對標..."),
+                    (100, "🏆 正在產出最終精選量化報告...")
                 ]
                 
                 for percent, text in process_steps:
-                    time.sleep(2.5) # 總計 15 秒
+                    time.sleep(2.5)
                     p_bar.progress(percent, text=text)
                     status.write(text)
                 
                 try:
-                    # 使用 timestamp 避免讀取舊快取，加上 error_bad_lines 跳過錯誤行
                     df = pd.read_csv(f"{RAW_URL}?t={int(time.time())}", on_bad_lines='skip')
                     st.session_state['temp_df'] = df
                     st.session_state['scan_completed'] = True
@@ -127,7 +180,7 @@ if not st.session_state['scan_completed']:
                     st.balloons()
                     st.rerun()
                 except Exception as e:
-                    st.error(f"數據同步失敗：無法正確解析 CSV 內容。詳細資訊：{e}")
+                    st.error(f"數據讀取失敗。請確認 GitHub 檔案內容正確。")
 
 else:
     # --- 結果頁面 ---
@@ -137,7 +190,7 @@ else:
     m1, m2, m3 = st.columns(3)
     m1.metric("今日掃描樣本", "900+ 檔")
     m2.metric("符合門檻標的", f"{len(df)} 檔")
-    m3.metric("資料更新日期", str(update_date))
+    m3.metric("最後更新日期", str(update_date))
     
     st.sidebar.button("🔄 重新啟動掃描", on_click=lambda: st.session_state.update({"scan_completed": False}))
     
@@ -158,7 +211,7 @@ else:
     output = io.BytesIO()
     with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
         df.to_excel(writer, index=False)
-    st.sidebar.download_button("📥 下載 Excel 報告", output.getvalue(), file_name="Quant_Report.xlsx")
+    st.sidebar.download_button("📥 下載 Excel 完整報告", output.getvalue(), file_name=f"Quant_Report_{update_date}.xlsx")
 
 st.divider()
 st.caption("QUANTUM DATA SYSTEM © 2026 | Minimalist Design. Maximum Insight.")
