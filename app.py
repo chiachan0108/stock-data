@@ -35,7 +35,7 @@ st.markdown('<div class="update-note">🕒 數據公告：每日 20:00 定時更
 strategy_options = [
     "營收動能型 (基本面優先)", 
     "股價動能型 (技術面優先)",
-    "營收、股價雙動能吻合"
+    "營收、股價動能雙吻合"
 ]
 strategy_choice = st.selectbox("📂 請選擇量化策略模組", strategy_options)
 
@@ -82,7 +82,7 @@ if not st.session_state['scan_completed']:
     _, btn_col, _ = st.columns([1, 2, 1])
     with btn_col:
         display_name = strategy_choice.split('(')[0][:10] + "..." if len(strategy_choice) > 15 else strategy_choice.split('(')[0]
-        if st.button(f"🚀 啟動【{display_name}】即時篩選系統", type="primary", use_container_width=True):
+        if st.button(f"🚀 啟動【{display_name}】AI量化篩選系統", type="primary", use_container_width=True):
             p_bar = st.progress(0, text="📡 正在連接量化數據終端...")
             with st.status("正在執行深度過濾與運算...", expanded=True) as status:
                 steps = [
