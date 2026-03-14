@@ -32,6 +32,9 @@ def get_pure_taiwan_stocks(token):
             else: return pd.DataFrame()
         except: return pd.DataFrame()
     
+    # 防呆：確保代號只包含純數字，排除 Yahoo 抓不到的非股票代號
+    df = df[df['stock_id'].astype(str).str.isnumeric()]
+    
     exclude_keywords = ['ETF', 'ETN', '存託憑證', '受益證券']
     df_pure = df[
         (df['stock_id'].astype(str).str.len() == 4) & 
@@ -44,7 +47,6 @@ def get_institutional_net_buy(sid, token, days, force_zero=False):
     sid = str(sid)
     today_str = datetime.date.today().strftime('%Y-%m-%d')
     cache_path = os.path.join(CACHE_DIR, f"{sid}_inst{days}d_{today_str}.csv")
-    
     if os.path.exists(cache_path):
         df = pd.read_csv(cache_path)
     else:
@@ -55,12 +57,10 @@ def get_institutional_net_buy(sid, token, days, force_zero=False):
             df = pd.DataFrame(resp.get("data", []))
             if not df.empty: df.to_csv(cache_path, index=False)
         except: return 0
-
     if isinstance(df, pd.DataFrame) and not df.empty and 'buy' in df.columns:
         latest_dates = sorted(df['date'].unique())[-days:]
         df_target = df[df['date'].isin(latest_dates)]
-        net_lots = int((pd.to_numeric(df_target['buy']).sum() - pd.to_numeric(df_target['sell']).sum()) / 1000)
-        return net_lots
+        return int((pd.to_numeric(df_target['buy']).sum() - pd.to_numeric(df_target['sell']).sum()) / 1000)
     return 0
 
 def check_refined_fundamentals(sid, token):
@@ -78,7 +78,6 @@ def check_refined_fundamentals(sid, token):
                 df = pd.DataFrame(resp.get("data", [])); df.to_csv(cache_path, index=False)
             else: return sid, False, 0, 0
         except: return sid, False, 0, 0
-    
     if isinstance(df, pd.DataFrame) and 'revenue' in df.columns and len(df) >= 24:
         df = df.sort_values('date').reset_index(drop=True)
         df['revenue'] = pd.to_numeric(df['revenue'], errors='coerce').fillna(0)
@@ -110,29 +109,45 @@ def sync_to_github_file(df, filename):
 def run_full_pipeline():
     start_time = datetime.datetime.now()
     today_str = start_time.strftime('%Y-%m-%d')
-    
     print(f"🔍 啟動今日 ({today_str}) 雙軌量化掃描任務...")
     
-    print("📈 下載 0050 基準資料...")
+    # 1. 0050 基準
     tw50 = yf.download("0050.TW", period="350d", auto_adjust=True, progress=False)
     tw50_ret_60 = float((tw50['Close'].iloc[-1] / tw50['Close'].iloc[-61]) - 1)
     tw50_ret_240 = float((tw50['Close'].iloc[-1] / tw50['Close'].iloc[-240]) - 1)
     tw50_ret_20 = float((tw50['Close'].iloc[-1] / tw50['Close'].iloc[-20]) - 1)
 
-    print("📊 獲取股票清單與歷史數據...")
+    # 2. 獲取股票清單
     pool_all = get_pure_taiwan_stocks(FINMIND_TOKEN_1)
     ticker_map_all = {str(r['stock_id']): f"{r['stock_id']}.TW" if r['type']=='twse' else f"{r['stock_id']}.TWO" for _, r in pool_all.iterrows()}
+    all_tickers = list(ticker_map_all.values())
+
+    # 3. 💡 優化：分批下載股價，防止被 Yahoo 限速 (Rate Limit)
+    print(f"📡 準備分批下載 {len(all_tickers)} 檔標的歷史股價...")
+    batch_size = 150  # 調整為較穩健的 150 檔
+    data_list = []
+    for i in range(0, len(all_tickers), batch_size):
+        batch = all_tickers[i:i + batch_size]
+        print(f"📥 正在下載第 {i} 到 {min(i+batch_size, len(all_tickers))} 檔...")
+        try:
+            # 💡 降低 threads 並增加休止時間
+            batch_data = yf.download(batch, period="350d", auto_adjust=True, threads=10, progress=False, group_by='ticker')
+            data_list.append(batch_data)
+            time.sleep(2.5) 
+        except Exception as e:
+            print(f"⚠️ 批次下載失敗: {e}")
     
+    data = pd.concat(data_list, axis=1)
+
+    # 策略 1 電子股範圍
     elec_industries = ['半導體業', '電腦及週邊設備業', '光電業', '通信網路業', '電子零組件業', '電子通路業', '資訊服務業', '其他電子業']
     pool_elec = pool_all[pool_all['industry_category'].isin(elec_industries)]
     elec_sids = pool_elec['stock_id'].astype(str).tolist()
 
-    data = yf.download(list(ticker_map_all.values()), period="350d", auto_adjust=True, threads=40, progress=True, group_by='ticker')
-
     # ==========================================
-    # 🛡️ 策略 1 運算：QUANTUM SCANNER (趨勢型)
+    # 🛡️ 策略 1：營收動能型 (QUANTUM)
     # ==========================================
-    print("\n🛡️ 正在執行【策略 1：QUANTUM 趨勢穩健型】...")
+    print("\n🛡️ 正在執行【策略 1：營收動能型】...")
     tech_candidates_1, metrics_1 = [], {}
     all_columns = data.columns.get_level_values(0).unique()
     
@@ -161,33 +176,26 @@ def run_full_pipeline():
                     "更新日期": today_str, "代號": sid, "名稱": row['stock_name'], "產業": row['industry_category'],
                     "現價": round(metrics_1[sid]["現價"], 2), "季乖離(%)": metrics_1[sid]["季乖離"], "年乖離(%)": metrics_1[sid]["年乖離"],
                     "近一季相對大盤強弱": metrics_1[sid]["近一季相對大盤強弱"], "營收MoM(%)": mom, "營收YoY(%)": yoy,
-                    "近5日法人買賣超(張數)": chip_net  # 💡 已修正欄位名稱
+                    "近5日法人買賣超(張數)": chip_net 
                 })
-    
     df_quantum = pd.DataFrame(final_list_1).sort_values(by="近一季相對大盤強弱", ascending=False) if final_list_1 else pd.DataFrame(columns=["代號"])
     
     # ==========================================
-    # 🚀 策略 2 運算：MOMENTUM ALPHA (動能爆發型)
+    # 🚀 策略 2：股價動能型 (MOMENTUM)
     # ==========================================
-    print("\n🚀 正在執行【策略 2：MOMENTUM 強勢動能型】...")
+    print("\n🚀 正在執行【策略 2：股價動能型】...")
     tech_candidates_2 = []
     for sid, full_ticker in ticker_map_all.items():
         if full_ticker not in all_columns: continue
         try:
             df = data[full_ticker].ffill().dropna()
             if len(df) < 240: continue
-            
             vol_20_lots = float(df['Volume'].tail(20).mean()) / 1000
             if vol_20_lots <= 500: continue
-            
             ret_240 = float((df['Close'].iloc[-1] / df['Close'].iloc[-240]) - 1)
             ret_20 = float((df['Close'].iloc[-1] / df['Close'].iloc[-20]) - 1)
-            
             if ret_240 > tw50_ret_240 and ret_20 > tw50_ret_20:
-                tech_candidates_2.append({
-                    "代號": sid, "現價": round(df['Close'].iloc[-1], 2), "20日均量(張)": int(vol_20_lots),
-                    "240日報酬(%)": round(ret_240 * 100, 2), "20日報酬(%)": round(ret_20 * 100, 2)
-                })
+                tech_candidates_2.append({"代號": sid, "現價": round(df['Close'].iloc[-1], 2), "20日均量(張)": int(vol_20_lots), "240日報酬(%)": round(ret_240 * 100, 2), "20日報酬(%)": round(ret_20 * 100, 2)})
         except: continue
 
     final_list_2 = []
@@ -196,25 +204,12 @@ def run_full_pipeline():
         net_buy = get_institutional_net_buy(sid, FINMIND_TOKEN_2, 20)
         if net_buy > 0:
             row = pool_all[pool_all['stock_id'].astype(str) == sid].iloc[0]
-            item["更新日期"] = today_str
-            item["名稱"] = row['stock_name']
-            item["產業"] = row['industry_category']
-            item["近20日法人買賣超(張)"] = net_buy
+            item.update({"更新日期": today_str, "名稱": row['stock_name'], "產業": row['industry_category'], "近20日法人買賣超(張)": net_buy})
             final_list_2.append(item)
             
-    df_momentum = pd.DataFrame(final_list_2)
-    if not df_momentum.empty:
-        df_momentum = df_momentum[["更新日期", "代號", "名稱", "產業", "現價", "20日均量(張)", "近20日法人買賣超(張)", "240日報酬(%)", "20日報酬(%)"]]
-        df_momentum = df_momentum.sort_values(by="近20日法人買賣超(張)", ascending=False)
-    else:
-        df_momentum = pd.DataFrame(columns=["代號"])
+    df_momentum = pd.DataFrame(final_list_2).sort_values(by="近20日法人買賣超(張)", ascending=False) if final_list_2 else pd.DataFrame(columns=["代號"])
 
-    # --- 輸出結果 ---
-    print("\n🏆 QUANTUM 策略結果 (預覽前 3 筆):")
-    display(df_quantum.head(3))
-    print("\n🏆 MOMENTUM 策略結果 (預覽前 3 筆):")
-    display(df_momentum.head(3))
-
+    print(f"\n✅ 任務完成！營收型: {len(df_quantum)} 檔, 股價型: {len(df_momentum)} 檔")
     sync_to_github_file(df_quantum, "daily_result.csv")
     sync_to_github_file(df_momentum, "momentum_result.csv")
 
