@@ -68,9 +68,9 @@ else:
     logic_html = """
     <div class="logic-grid">
         <div class="logic-item"><div class="logic-index">01 / INTERSECTION</div><div class="logic-subtitle">雙引擎交集</div><div class="logic-desc">系統自動比對，抓出同時具備 <span class="highlight">營收創高動能</span> 與 <span class="highlight">技術面強勢</span> 的極致精選標的。</div></div>
-        <div class="logic-item"><div class="logic-index">02 / FUNDAMENTAL</div><div class="logic-subtitle">基本面護城河</div><div class="logic-desc">LTM營收創5年新高，且近1季營收年增率大於零。</div></div>
-        <div class="logic-item"><div class="logic-index">03 / TECHNICAL</div><div class="logic-subtitle">技術面爆發力</div><div class="logic-desc">均線多頭排列，且長短天期績效皆 <span class="highlight">完勝大盤(0050)</span>。</div></div>
-        <div class="logic-item"><div class="logic-index">04 / SMART MONEY</div><div class="logic-subtitle">法人雙重認同</div><div class="logic-desc">確保近期 5 日與 20 日三大法人皆呈現 <span class="highlight">買超挹注</span>。</div></div>
+        <div class="logic-item"><div class="logic-index">02 / FUNDAMENTAL</div><div class="logic-subtitle">基本面護城河</div><div class="logic-desc">近一年累積營收創5年新高，且近1季營收年增率正成長。</div></div>
+        <div class="logic-item"><div class="logic-index">03 / TECHNICAL</div><div class="logic-subtitle">技術面爆發力</div><div>div class="logic-desc">均線多頭排列，且長短天期績效皆 <span class="highlight"超越大盤同期績效</span>。</div></div>
+        <div class="logic-item"><div class="logic-index">04 / SMART MONEY</div><div class="logic-subtitle">法人雙重認同</div><div class="logic-desc">近 20 日三大法人呈現 <span class="highlight">買超挹注</span>。</div></
     </div>
     """
 
