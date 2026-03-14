@@ -5,7 +5,6 @@ import datetime, io, time, requests
 # =============================================================================
 # [配置區]
 # =============================================================================
-# 根據 GitHub 儲存庫路徑設定
 GITHUB_USER = "chiachan0108"
 GITHUB_REPO = "stock-data"
 
@@ -23,6 +22,7 @@ st.markdown("""
     .logic-subtitle { font-size: 1.1rem; font-weight: 700; color: #ffffff; margin-bottom: 8px; }
     .logic-desc { font-size: 0.95rem; color: #a0a0a0; line-height: 1.6; }
     .highlight { color: #00f2ff; font-weight: 700; }
+    .stProgress > div > div > div > div { background: linear-gradient(to right, #00f2ff, #0072ff); height: 8px; }
     </style>
 """, unsafe_allow_html=True)
 
@@ -31,7 +31,7 @@ if 'scan_completed' not in st.session_state: st.session_state['scan_completed'] 
 st.markdown('<h1 class="main-title">🛡️ QUANTUM SCANNER</h1>', unsafe_allow_html=True)
 st.markdown('<div class="update-note">🕒 數據公告：每日 20:00 定時更新資料庫</div>', unsafe_allow_html=True)
 
-# --- 策略選擇器 (已更新名稱) ---
+# --- 策略選擇器 ---
 strategy_choice = st.selectbox("📂 請選擇量化策略模組", ["營收動能成長型(基本面優先)", "趨勢動能強勢型(技術面優先)"])
 
 if strategy_choice == "營收動能成長型(基本面優先)":
@@ -54,7 +54,7 @@ else:
     <div class="logic-grid">
         <div class="logic-item"><div class="logic-index">01 / SCOPE</div><div class="logic-subtitle">選股範圍</div><div class="logic-desc">全體上市櫃，<span class="highlight">嚴格排除 ETF、ETN、權證</span>等非普通股。</div></div>
         <div class="logic-item"><div class="logic-index">02 / LIQUIDITY</div><div class="logic-subtitle">流動性門檻</div><div class="logic-desc">近20日平均日成交量需大於 <span class="highlight">500張</span>。</div></div>
-        <div class="logic-item"><div class="logic-index">03 / TRACKING</div><div class="logic-subtitle">雙週期大盤對標</div><div class="logic-desc">近 240 日與 20 日績效 <span class="highlight">皆需超越大盤績效</span> 。</div></div>
+        <div class="logic-item"><div class="logic-index">03 / TRACKING</div><div class="logic-subtitle">雙週期大盤對標</div><div class="logic-desc">近 240 日與 20 日績效 <span class="highlight">皆需超越 0050</span> (還原權值)。</div></div>
         <div class="logic-item"><div class="logic-index">04 / SMART MONEY</div><div class="logic-subtitle">法人籌碼護航</div><div class="logic-desc">近 20 個交易日三大法人買賣超 <span class="highlight">大於 0 張</span>。</div></div>
     </div>
     """
@@ -66,24 +66,38 @@ if not st.session_state['scan_completed']:
     st.markdown(logic_html, unsafe_allow_html=True)
     _, btn_col, _ = st.columns([1, 2, 1])
     with btn_col:
-        # 修改按鈕顯示文字，擷取括號前的名稱
         display_name = strategy_choice.split('(')[0]
-        if st.button(f"🚀 載入【{display_name}】數據", type="primary", use_container_width=True):
-            try:
-                RAW_URL = f"https://raw.githubusercontent.com/{GITHUB_USER}/{GITHUB_REPO}/main/{TARGET_CSV}"
-                r = requests.get(f"{RAW_URL}?t={int(time.time())}", timeout=10)
-                if r.status_code == 200:
-                    st.session_state['temp_df'] = pd.read_csv(io.StringIO(r.text), on_bad_lines='skip')
-                    st.session_state['scan_completed'] = True
-                    st.rerun()
-                else: st.error(f"GitHub 回傳錯誤碼: {r.status_code}")
-            except Exception: st.error("數據同步中，請稍後再試。")
+        if st.button(f"🚀 啟動【{display_name}】即時篩選系統", type="primary", use_container_width=True):
+            p_bar = st.progress(0, text="📡 正在連接量化數據終端...")
+            with st.status("正在執行深度過濾與運算...", expanded=True) as status:
+                # 💡 設定 5 個步驟，每個步驟 3 秒，總計 15 秒
+                steps = [
+                    (20, "🔍 正在初始化全體上市櫃數據終端..."),
+                    (40, "📈 執行多維度技術指標過濾與位階判定..."),
+                    (60, "🏭 檢索基本面營收規模與成長加速度數據..."),
+                    (80, "👥 同步三大法人近 20 日籌碼分布狀態..."),
+                    (100, "🏆 執行 0050 相對強弱判定並產出最終報告...")
+                ]
+                for p, txt in steps:
+                    time.sleep(3.0)  # 每個步驟精確停頓 3 秒
+                    p_bar.progress(p, text=txt)
+                    status.write(txt)
+                
+                try:
+                    RAW_URL = f"https://raw.githubusercontent.com/{GITHUB_USER}/{GITHUB_REPO}/main/{TARGET_CSV}"
+                    r = requests.get(f"{RAW_URL}?t={int(time.time())}", timeout=10)
+                    if r.status_code == 200:
+                        st.session_state['temp_df'] = pd.read_csv(io.StringIO(r.text), on_bad_lines='skip')
+                        st.session_state['scan_completed'] = True
+                        status.update(label="✅ 篩選完成", state="complete", expanded=False)
+                        st.balloons(); st.rerun()
+                    else: st.error(f"數據讀取失敗，請確認資料庫狀態。")
+                except Exception: st.error("連線超時，請稍後再試。")
 else:
     df = st.session_state['temp_df']
     tz_delta = datetime.timedelta(hours=8)
     now_taipei = datetime.datetime.utcnow() + tz_delta
     
-    # 讀取 CSV 中的日期，若無則顯示預設日期
     if not df.empty and '更新日期' in df.columns: 
         update_date = df['更新日期'].iloc[0]
     else: 
@@ -100,27 +114,19 @@ else:
     if not df.empty:
         styled = df.style
         if strategy_choice == "營收動能成長型(基本面優先)":
-            # 漸層色配置與欄位格式化 (策略一)
             styled = styled.background_gradient(subset=['年乖離(%)'], cmap='RdYlGn_r') \
                            .background_gradient(subset=['近5日法人買賣超(張數)'], cmap='Greens') \
                            .background_gradient(subset=['近一季相對大盤強弱'], cmap='RdYlGn')
             st.dataframe(styled.format({
-                "現價": "{:.2f}", 
-                "季乖離(%)": "{:.2f}%", 
-                "年乖離(%)": "{:.2f}%", 
-                "近一季相對大盤強弱": "{:+.2f}%", 
-                "營收YoY(%)": "{:.2f}%", 
-                "營收MoM(%)": "{:.2f}%"
+                "現價": "{:.2f}", "季乖離(%)": "{:.2f}%", "年乖離(%)": "{:.2f}%", 
+                "近一季相對大盤強弱": "{:+.2f}%", "營收YoY(%)": "{:.2f}%", "營收MoM(%)": "{:.2f}%"
             }, na_rep="-"), use_container_width=True)
         else:
-            # 漸層色配置與欄位格式化 (策略二)
             styled = styled.background_gradient(subset=['近20日法人買賣超(張)'], cmap='Greens') \
                            .background_gradient(subset=['240日報酬(%)'], cmap='RdYlGn') \
                            .background_gradient(subset=['20日報酬(%)'], cmap='RdYlGn')
             st.dataframe(styled.format({
-                "現價": "{:.2f}", 
-                "240日報酬(%)": "{:+.2f}%", 
-                "20日報酬(%)": "{:+.2f}%", 
+                "現價": "{:.2f}", "240日報酬(%)": "{:+.2f}%", "20日報酬(%)": "{:+.2f}%", 
                 "近20日法人買賣超(張)": "{:,.0f}"
             }, na_rep="-"), use_container_width=True)
     else:
