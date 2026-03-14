@@ -87,7 +87,8 @@ else:
     if not df.empty:
         styled = df.style
         if strategy_choice == "策略一：QUANTUM 趨勢穩健型":
-            styled = styled.background_gradient(subset=['年乖離(%)'], cmap='RdYlGn_r').background_gradient(subset=['近5日三大法人買賣超(張數)'], cmap='Greens').background_gradient(subset=['近一季相對大盤強弱'], cmap='RdYlGn')
+            # 💡 已對齊新欄位名稱：近5日法人買賣超(張數)
+            styled = styled.background_gradient(subset=['年乖離(%)'], cmap='RdYlGn_r').background_gradient(subset=['近5日法人買賣超(張數)'], cmap='Greens').background_gradient(subset=['近一季相對大盤強弱'], cmap='RdYlGn')
             st.dataframe(styled.format({"現價": "{:.2f}", "季乖離(%)": "{:.2f}%", "年乖離(%)": "{:.2f}%", "近一季相對大盤強弱": "{:+.2f}%", "營收YoY(%)": "{:.2f}%", "營收MoM(%)": "{:.2f}%"}, na_rep="-"), use_container_width=True)
         else:
             styled = styled.background_gradient(subset=['近20日法人買賣超(張)'], cmap='Greens').background_gradient(subset=['240日報酬(%)'], cmap='RdYlGn').background_gradient(subset=['20日報酬(%)'], cmap='RdYlGn')
