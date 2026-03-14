@@ -10,7 +10,7 @@ GITHUB_REPO = "stock-data"
 
 st.set_page_config(page_title="QUANTUM TECH SCANNER", layout="wide", initial_sidebar_state="collapsed")
 
-# 💡 視覺優化：統一高亮樣式，移除多餘顏色
+# 💡 視覺優化：統一高亮樣式
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap');
@@ -123,16 +123,16 @@ if 'scan_completed' not in st.session_state: st.session_state['scan_completed'] 
 st.markdown('<h1 class="main-title">QUANTUM SCANNER</h1>', unsafe_allow_html=True)
 st.markdown('<div class="update-note">SYS.STATUS: ONLINE | DATA_SYNC: DAILY 20:00 CST</div>', unsafe_allow_html=True)
 
-# --- 策略選擇器 ---
+# --- 策略選擇器 (新增 A, B, C 前綴) ---
 strategy_options = [
-    "營收動能型 (基本面優先)", 
-    "股價動能型 (技術面優先)",
-    "營收、股價動能雙吻合"
+    "A. 營收動能型 (基本面優先)", 
+    "B. 股價動能型 (技術面優先)",
+    "C. 營收、股價動能雙吻合"
 ]
 st.markdown("### ⚙️ STRATEGY CONFIGURATION")
 strategy_choice = st.selectbox("請選擇量化策略模組", strategy_options, label_visibility="collapsed")
 
-if strategy_choice == "營收動能型 (基本面優先)":
+if strategy_choice == "A. 營收動能型 (基本面優先)":
     TARGET_MODE = "single_1"
     logic_html = """
     <div class="logic-grid">
@@ -146,7 +146,7 @@ if strategy_choice == "營收動能型 (基本面優先)":
         <div class="logic-item"><div class="logic-index">08 / TRACKING</div><div class="logic-subtitle">相對強弱判定</div><div class="logic-desc">更新三大法人籌碼並 <span class="highlight">判定相對大盤強弱</span>。</div></div>
     </div>
     """
-elif strategy_choice == "股價動能型 (技術面優先)":
+elif strategy_choice == "B. 股價動能型 (技術面優先)":
     TARGET_MODE = "single_2"
     logic_html = """
     <div class="logic-grid">
@@ -174,7 +174,8 @@ if not st.session_state['scan_completed']:
     st.markdown(logic_html, unsafe_allow_html=True)
     _, btn_col, _ = st.columns([1, 2, 1])
     with btn_col:
-        display_name = strategy_choice.split('(')[0].strip()
+        # 按鈕顯示文字取第一個前綴後的主名稱
+        display_name = strategy_choice.split('. ')[1].split('(')[0].strip()
         if st.button(f"🚀 啟動【{display_name}】AI量化篩選系統", type="primary", use_container_width=True):
             p_bar = st.progress(0, text="📡 正在連接量化數據終端...")
             with st.status("正在執行深度過濾與運算...", expanded=True) as status:
@@ -186,7 +187,7 @@ if not st.session_state['scan_completed']:
                     (100, "🏆 執行相對強弱判定並產出最終精選報告...")
                 ]
                 for p, txt in steps:
-                    time.sleep(3.0) # 保持 15 秒的美好感受
+                    time.sleep(3.0) 
                     p_bar.progress(p, text=txt)
                     status.write(txt)
                 
@@ -231,8 +232,8 @@ else:
         update_date = now_taipei.strftime('%Y-%m-%d') if now_taipei.hour >= 20 else (now_taipei - datetime.timedelta(days=1)).strftime('%Y-%m-%d')
     
     m1, m2, m3 = st.columns(3)
-    if "雙動能" in strategy_choice: sample_text = "極致交集比對"
-    elif "營收動能" in strategy_choice: sample_text = "900+ 檔"
+    if "C." in strategy_choice: sample_text = "極致交集比對"
+    elif "A." in strategy_choice: sample_text = "900+ 檔"
     else: sample_text = "1700+ 檔"
     
     m1.metric("📌 掃描樣本池", sample_text)
@@ -243,10 +244,9 @@ else:
     st.markdown("### 🏆 QUANTUM TOP PICKS")
     
     if not df.empty:
-        # 單純輸出，僅做數字格式化
-        if "基本面優先" in strategy_choice:
+        if "A." in strategy_choice:
             st.dataframe(df.style.format({"現價": "{:.2f}", "季乖離(%)": "{:.2f}%", "年乖離(%)": "{:.2f}%", "近一季相對大盤強弱": "{:+.2f}%", "營收YoY(%)": "{:.2f}%", "營收MoM(%)": "{:.2f}%"}, na_rep="-"), use_container_width=True)
-        elif "技術面優先" in strategy_choice:
+        elif "B." in strategy_choice:
             st.dataframe(df.style.format({"現價": "{:.2f}", "240日報酬(%)": "{:+.2f}%", "20日報酬(%)": "{:+.2f}%", "近20日法人買賣超(張)": "{:,.0f}"}, na_rep="-"), use_container_width=True)
         else:
             display_cols = ['代號', '名稱', '產業', '現價', '營收YoY(%)', '近一季相對大盤強弱', '240日報酬(%)', '20日報酬(%)', '近5日法人買賣超(張數)', '近20日法人買賣超(張)']
