@@ -147,7 +147,6 @@ if strategy_choice == "A. 營收動能型 (基本面優先)":
     """
 elif strategy_choice == "B. 股價動能型 (技術面優先)":
     TARGET_MODE = "single_2"
-    # 💡 更新 B 選項：標題改為「雙週期績效比對」
     logic_html = """
     <div class="logic-grid">
         <div class="logic-item"><div class="logic-index">01 / SCOPE</div><div class="logic-subtitle">選股範圍</div><div class="logic-desc">全體上市櫃公司，嚴格排除 <span class="highlight">ETF、ETN、權證</span> 等非普通股。</div></div>
@@ -217,7 +216,8 @@ if not st.session_state['scan_completed']:
                         st.session_state['temp_df'] = df_final
                         st.session_state['scan_completed'] = True
                         status.update(label="✅ 篩選完成", state="complete", expanded=False)
-                        st.balloons(); st.rerun()
+                        # 💡 已移除 st.balloons()
+                        st.rerun()
                     else: st.error(f"數據讀取失敗，請確認資料庫狀態。")
                 except Exception: st.error("連線超時，請稍後再試。")
 else:
