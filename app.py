@@ -31,11 +31,16 @@ if 'scan_completed' not in st.session_state: st.session_state['scan_completed'] 
 st.markdown('<h1 class="main-title">🛡️ QUANTUM SCANNER</h1>', unsafe_allow_html=True)
 st.markdown('<div class="update-note">🕒 數據公告：每日 20:00 定時更新資料庫</div>', unsafe_allow_html=True)
 
-# --- 策略選擇器 ---
-strategy_choice = st.selectbox("📂 請選擇量化策略模組", ["營收動能成長型(基本面優先)", "趨勢動能強勢型(技術面優先)"])
+# --- 策略選擇器 (新增第三選項) ---
+strategy_options = [
+    "營收動能成長型(基本面優先)", 
+    "趨勢動能強勢型(技術面優先)",
+    "營收成長、股價趨勢雙動能吻合標的"
+]
+strategy_choice = st.selectbox("📂 請選擇量化策略模組", strategy_options)
 
 if strategy_choice == "營收動能成長型(基本面優先)":
-    TARGET_CSV = "daily_result.csv"
+    TARGET_MODE = "single_1"
     logic_html = """
     <div class="logic-grid">
         <div class="logic-item"><div class="logic-index">01 / SCOPE</div><div class="logic-subtitle">選股範圍</div><div class="logic-desc">鎖定台灣全體上市櫃<span class="highlight">電子產業</span>標的。</div></div>
@@ -48,14 +53,24 @@ if strategy_choice == "營收動能成長型(基本面優先)":
         <div class="logic-item"><div class="logic-index">08 / TRACKING</div><div class="logic-subtitle">相對強弱判定</div><div class="logic-desc">更新三大法人籌碼並 <span class="highlight">判定相對大盤強弱</span> 。</div></div>
     </div>
     """
-else:
-    TARGET_CSV = "momentum_result.csv"
+elif strategy_choice == "趨勢動能強勢型(技術面優先)":
+    TARGET_MODE = "single_2"
     logic_html = """
     <div class="logic-grid">
         <div class="logic-item"><div class="logic-index">01 / SCOPE</div><div class="logic-subtitle">選股範圍</div><div class="logic-desc">全體上市櫃，<span class="highlight">嚴格排除 ETF、ETN、權證</span>等非普通股。</div></div>
         <div class="logic-item"><div class="logic-index">02 / LIQUIDITY</div><div class="logic-subtitle">流動性門檻</div><div class="logic-desc">近20日平均日成交量需大於 <span class="highlight">500張</span>。</div></div>
         <div class="logic-item"><div class="logic-index">03 / TRACKING</div><div class="logic-subtitle">雙週期大盤對標</div><div class="logic-desc">近 240 日與 20 日績效 <span class="highlight">皆需超越 0050</span> (還原權值)。</div></div>
         <div class="logic-item"><div class="logic-index">04 / SMART MONEY</div><div class="logic-subtitle">法人籌碼護航</div><div class="logic-desc">近 20 個交易日三大法人買賣超 <span class="highlight">大於 0 張</span>。</div></div>
+    </div>
+    """
+else:
+    TARGET_MODE = "dual_intersection"
+    logic_html = """
+    <div class="logic-grid">
+        <div class="logic-item"><div class="logic-index">01 / INTERSECTION</div><div class="logic-subtitle">雙引擎交集</div><div class="logic-desc">系統自動比對，抓出同時具備 <span class="highlight">營收創高動能</span> 與 <span class="highlight">技術面強勢</span> 的極致精選標的。</div></div>
+        <div class="logic-item"><div class="logic-index">02 / FUNDAMENTAL</div><div class="logic-subtitle">基本面護城河</div><div class="logic-desc">LTM營收創5年新高，且近1季營收年增率大於零。</div></div>
+        <div class="logic-item"><div class="logic-index">03 / TECHNICAL</div><div class="logic-subtitle">技術面爆發力</div><div class="logic-desc">均線多頭排列，且長短天期績效皆 <span class="highlight">完勝大盤(0050)</span>。</div></div>
+        <div class="logic-item"><div class="logic-index">04 / SMART MONEY</div><div class="logic-subtitle">法人雙重認同</div><div class="logic-desc">確保近期 5 日與 20 日三大法人皆呈現 <span class="highlight">買超挹注</span>。</div></div>
     </div>
     """
 
@@ -66,32 +81,62 @@ if not st.session_state['scan_completed']:
     st.markdown(logic_html, unsafe_allow_html=True)
     _, btn_col, _ = st.columns([1, 2, 1])
     with btn_col:
-        display_name = strategy_choice.split('(')[0]
+        display_name = strategy_choice.split('(')[0][:10] + "..." if len(strategy_choice) > 15 else strategy_choice.split('(')[0]
         if st.button(f"🚀 啟動【{display_name}】即時篩選系統", type="primary", use_container_width=True):
             p_bar = st.progress(0, text="📡 正在連接量化數據終端...")
             with st.status("正在執行深度過濾與運算...", expanded=True) as status:
-                # 💡 設定 5 個步驟，每個步驟 3 秒，總計 15 秒
                 steps = [
                     (20, "🔍 正在初始化全體上市櫃數據終端..."),
                     (40, "📈 執行多維度技術指標過濾與位階判定..."),
                     (60, "🏭 檢索基本面營收規模與成長加速度數據..."),
-                    (80, "👥 同步三大法人近 20 日籌碼分布狀態..."),
-                    (100, "🏆 執行 0050 相對強弱判定並產出最終報告...")
+                    (80, "👥 同步三大法人籌碼分布狀態與交叉比對..."),
+                    (100, "🏆 執行相對強弱判定並產出最終精選報告...")
                 ]
                 for p, txt in steps:
-                    time.sleep(3.0)  # 每個步驟精確停頓 3 秒
+                    time.sleep(3.0)  # 維持完美的 15 秒儀式感
                     p_bar.progress(p, text=txt)
                     status.write(txt)
                 
                 try:
-                    RAW_URL = f"https://raw.githubusercontent.com/{GITHUB_USER}/{GITHUB_REPO}/main/{TARGET_CSV}"
-                    r = requests.get(f"{RAW_URL}?t={int(time.time())}", timeout=10)
-                    if r.status_code == 200:
-                        st.session_state['temp_df'] = pd.read_csv(io.StringIO(r.text), on_bad_lines='skip')
+                    url_1 = f"https://raw.githubusercontent.com/{GITHUB_USER}/{GITHUB_REPO}/main/daily_result.csv?t={int(time.time())}"
+                    url_2 = f"https://raw.githubusercontent.com/{GITHUB_USER}/{GITHUB_REPO}/main/momentum_result.csv?t={int(time.time())}"
+                    
+                    if TARGET_MODE == "single_1":
+                        r = requests.get(url_1, timeout=10)
+                        df_final = pd.read_csv(io.StringIO(r.text), on_bad_lines='skip') if r.status_code == 200 else pd.DataFrame()
+                    elif TARGET_MODE == "single_2":
+                        r = requests.get(url_2, timeout=10)
+                        df_final = pd.read_csv(io.StringIO(r.text), on_bad_lines='skip') if r.status_code == 200 else pd.DataFrame()
+                    else:
+                        # --- 💡 第三邏輯：雙引擎交集核心 ---
+                        r1 = requests.get(url_1, timeout=10)
+                        r2 = requests.get(url_2, timeout=10)
+                        if r1.status_code == 200 and r2.status_code == 200:
+                            df1 = pd.read_csv(io.StringIO(r1.text), on_bad_lines='skip')
+                            df2 = pd.read_csv(io.StringIO(r2.text), on_bad_lines='skip')
+                            
+                            if not df1.empty and not df2.empty:
+                                df1['代號'] = df1['代號'].astype(str)
+                                df2['代號'] = df2['代號'].astype(str)
+                                # 透過 pd.merge 取交集，並保留兩邊的關鍵特徵欄位
+                                df_final = pd.merge(
+                                    df1, 
+                                    df2[['代號', '240日報酬(%)', '20日報酬(%)', '近20日法人買賣超(張)']], 
+                                    on='代號', 
+                                    how='inner' # inner join 確保只有兩邊都有的股票會留下
+                                )
+                            else:
+                                df_final = pd.DataFrame()
+                        else:
+                            df_final = pd.DataFrame()
+
+                    if not df_final.empty or (TARGET_MODE == "dual_intersection" and df_final.empty):
+                        st.session_state['temp_df'] = df_final
                         st.session_state['scan_completed'] = True
                         status.update(label="✅ 篩選完成", state="complete", expanded=False)
                         st.balloons(); st.rerun()
-                    else: st.error(f"數據讀取失敗，請確認資料庫狀態。")
+                    else: 
+                        st.error(f"數據讀取失敗，請確認資料庫狀態。")
                 except Exception: st.error("連線超時，請稍後再試。")
 else:
     df = st.session_state['temp_df']
@@ -104,7 +149,11 @@ else:
         update_date = now_taipei.strftime('%Y-%m-%d') if now_taipei.hour >= 20 else (now_taipei - datetime.timedelta(days=1)).strftime('%Y-%m-%d')
     
     m1, m2, m3 = st.columns(3)
-    m1.metric("今日掃描樣本", "900+ 檔" if "營收動能" in strategy_choice else "1700+ 檔")
+    if "雙動能" in strategy_choice: sample_text = "極致交集比對"
+    elif "營收動能" in strategy_choice: sample_text = "900+ 檔"
+    else: sample_text = "1700+ 檔"
+    
+    m1.metric("今日掃描樣本", sample_text)
     m2.metric("符合門檻標的", f"{len(df)} 檔")
     m3.metric("數據最後更新", str(update_date))
     
@@ -113,7 +162,7 @@ else:
     
     if not df.empty:
         styled = df.style
-        if strategy_choice == "營收動能成長型(基本面優先)":
+        if "基本面優先" in strategy_choice:
             styled = styled.background_gradient(subset=['年乖離(%)'], cmap='RdYlGn_r') \
                            .background_gradient(subset=['近5日法人買賣超(張數)'], cmap='Greens') \
                            .background_gradient(subset=['近一季相對大盤強弱'], cmap='RdYlGn')
@@ -121,7 +170,8 @@ else:
                 "現價": "{:.2f}", "季乖離(%)": "{:.2f}%", "年乖離(%)": "{:.2f}%", 
                 "近一季相對大盤強弱": "{:+.2f}%", "營收YoY(%)": "{:.2f}%", "營收MoM(%)": "{:.2f}%"
             }, na_rep="-"), use_container_width=True)
-        else:
+            
+        elif "技術面優先" in strategy_choice:
             styled = styled.background_gradient(subset=['近20日法人買賣超(張)'], cmap='Greens') \
                            .background_gradient(subset=['240日報酬(%)'], cmap='RdYlGn') \
                            .background_gradient(subset=['20日報酬(%)'], cmap='RdYlGn')
@@ -129,12 +179,28 @@ else:
                 "現價": "{:.2f}", "240日報酬(%)": "{:+.2f}%", "20日報酬(%)": "{:+.2f}%", 
                 "近20日法人買賣超(張)": "{:,.0f}"
             }, na_rep="-"), use_container_width=True)
+            
+        else:
+            # 💡 雙引擎交集專用表格渲染：同時展示兩邊的最強指標
+            styled = styled.background_gradient(subset=['近5日法人買賣超(張數)'], cmap='Greens') \
+                           .background_gradient(subset=['近20日法人買賣超(張)'], cmap='Greens') \
+                           .background_gradient(subset=['近一季相對大盤強弱'], cmap='RdYlGn') \
+                           .background_gradient(subset=['240日報酬(%)'], cmap='RdYlGn')
+            
+            # 整理顯示欄位順序
+            display_cols = ['代號', '名稱', '產業', '現價', '營收YoY(%)', '近一季相對大盤強弱', '240日報酬(%)', '20日報酬(%)', '近5日法人買賣超(張數)', '近20日法人買賣超(張)']
+            st.dataframe(styled.format({
+                "現價": "{:.2f}", "近一季相對大盤強弱": "{:+.2f}%", "營收YoY(%)": "{:.2f}%", 
+                "240日報酬(%)": "{:+.2f}%", "20日報酬(%)": "{:+.2f}%",
+                "近5日法人買賣超(張數)": "{:,.0f}", "近20日法人買賣超(張)": "{:,.0f}"
+            }, na_rep="-")[display_cols], use_container_width=True)
     else:
-        st.warning("目前暫無符合條件的選股結果。")
+        st.warning("目前暫無同時符合兩大嚴苛策略的交集標的，請靜候市場輪動。")
     
-    output = io.BytesIO()
-    with pd.ExcelWriter(output, engine='xlsxwriter') as writer: 
-        df.to_excel(writer, index=False)
-    st.download_button("📥 下載 Excel 完整報告", output.getvalue(), file_name=f"{TARGET_CSV.split('.')[0]}_{update_date}.xlsx")
+    if not df.empty:
+        output = io.BytesIO()
+        with pd.ExcelWriter(output, engine='xlsxwriter') as writer: 
+            df.to_excel(writer, index=False)
+        st.download_button("📥 下載 Excel 完整報告", output.getvalue(), file_name=f"Intersection_Picks_{update_date}.xlsx")
 
 st.divider(); st.caption("QUANTUM DATA SYSTEM © 2026 | Minimalist Design. Maximum Insight.")
