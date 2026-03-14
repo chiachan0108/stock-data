@@ -122,7 +122,14 @@ strategy_options = [
     "C. 營收、股價動能雙吻合"
 ]
 st.markdown("### ⚙️ STRATEGY CONFIGURATION")
-strategy_choice = st.selectbox("請選擇量化策略模組", strategy_options, label_visibility="collapsed")
+
+# 💡 優化 1：當 scan_completed 為 True 時，將選單設為 disabled (反灰鎖定)
+strategy_choice = st.selectbox(
+    "請選擇量化策略模組", 
+    strategy_options, 
+    label_visibility="collapsed",
+    disabled=st.session_state['scan_completed']
+)
 
 if strategy_choice == "A. 營收動能型 (基本面優先)":
     TARGET_MODE = "single_1"
@@ -140,7 +147,6 @@ if strategy_choice == "A. 營收動能型 (基本面優先)":
     """
 elif strategy_choice == "B. 股價動能型 (技術面優先)":
     TARGET_MODE = "single_2"
-    # 💡 依照您的需求更新 B 選項文字敘述
     logic_html = """
     <div class="logic-grid">
         <div class="logic-item"><div class="logic-index">01 / SCOPE</div><div class="logic-subtitle">選股範圍</div><div class="logic-desc">全體上市櫃公司，嚴格排除 <span class="highlight">ETF、ETN、權證</span> 等非普通股。</div></div>
@@ -167,7 +173,6 @@ if not st.session_state['scan_completed']:
     st.markdown(logic_html, unsafe_allow_html=True)
     _, btn_col, _ = st.columns([1, 2, 1])
     with btn_col:
-        # 按鈕名稱解析
         display_name = strategy_choice.split('. ')[1].split('(')[0].strip()
         if st.button(f"🚀 啟動【{display_name}】AI量化篩選系統", type="primary", use_container_width=True):
             p_bar = st.progress(0, text="📡 正在連接量化數據終端...")
@@ -233,7 +238,17 @@ else:
     m2.metric("🎯 符合門檻標的", f"{len(df)} 檔")
     m3.metric("🕒 數據基準日", str(update_date))
     
-    st.button("🔄 重新選擇策略", on_click=lambda: st.session_state.update({"scan_completed": False}))
+    st.markdown("<br>", unsafe_allow_html=True)
+    
+    # 💡 優化 2：放大並凸顯重新選擇按鈕
+    st.button(
+        "🔄 重新選擇策略 (返回主選單)", 
+        on_click=lambda: st.session_state.update({"scan_completed": False}), 
+        type="primary", 
+        use_container_width=True
+    )
+    
+    st.markdown("<br>", unsafe_allow_html=True)
     st.markdown("### 🏆 QUANTUM TOP PICKS")
     
     if not df.empty:
