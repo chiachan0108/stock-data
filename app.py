@@ -123,7 +123,7 @@ strategy_options = [
 ]
 st.markdown("### ⚙️ STRATEGY CONFIGURATION")
 
-# 💡 優化 1：當 scan_completed 為 True 時，將選單設為 disabled (反灰鎖定)
+# 下拉選單在掃描完成後會鎖定
 strategy_choice = st.selectbox(
     "請選擇量化策略模組", 
     strategy_options, 
@@ -147,11 +147,12 @@ if strategy_choice == "A. 營收動能型 (基本面優先)":
     """
 elif strategy_choice == "B. 股價動能型 (技術面優先)":
     TARGET_MODE = "single_2"
+    # 💡 更新 B 選項：標題改為「雙週期績效比對」
     logic_html = """
     <div class="logic-grid">
         <div class="logic-item"><div class="logic-index">01 / SCOPE</div><div class="logic-subtitle">選股範圍</div><div class="logic-desc">全體上市櫃公司，嚴格排除 <span class="highlight">ETF、ETN、權證</span> 等非普通股。</div></div>
         <div class="logic-item"><div class="logic-index">02 / LIQUIDITY</div><div class="logic-subtitle">流動性門檻</div><div class="logic-desc">近20日平均日成交量需大於 <span class="highlight">500張</span>。</div></div>
-        <div class="logic-item"><div class="logic-index">03 / TRACKING</div><div class="logic-subtitle">雙週期大盤對標</div><div class="logic-desc">股價近 240 日與 20 日績效皆需 <span class="highlight">超越大盤同期績效</span>。</div></div>
+        <div class="logic-item"><div class="logic-index">03 / TRACKING</div><div class="logic-subtitle">雙週期績效比對</div><div class="logic-desc">股價近 240 日與 20 日績效皆需 <span class="highlight">超越大盤同期績效</span>。</div></div>
         <div class="logic-item"><div class="logic-index">04 / SMART MONEY</div><div class="logic-subtitle">法人籌碼護航</div><div class="logic-desc">近 20 個交易日三大法人呈現 <span class="highlight">淨買超</span>。</div></div>
     </div>
     """
@@ -240,7 +241,7 @@ else:
     
     st.markdown("<br>", unsafe_allow_html=True)
     
-    # 💡 優化 2：放大並凸顯重新選擇按鈕
+    # 醒目且易點擊的返回按鈕
     st.button(
         "🔄 重新選擇策略 (返回主選單)", 
         on_click=lambda: st.session_state.update({"scan_completed": False}), 
