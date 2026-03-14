@@ -31,15 +31,15 @@ if 'scan_completed' not in st.session_state: st.session_state['scan_completed'] 
 st.markdown('<h1 class="main-title">🛡️ QUANTUM SCANNER</h1>', unsafe_allow_html=True)
 st.markdown('<div class="update-note">🕒 數據公告：每日 20:00 定時更新資料庫</div>', unsafe_allow_html=True)
 
-# --- 策略選擇器 ---
+# --- 策略選擇器 (已更新名稱) ---
 strategy_options = [
-    "營收動能成長型(基本面優先)", 
-    "趨勢動能強勢型(技術面優先)",
-    "營收成長、股價趨勢雙動能吻合標的"
+    "營收動能型 (基本面優先)", 
+    "股價動能型 (技術面優先)",
+    "營收、股價雙動能吻合"
 ]
 strategy_choice = st.selectbox("📂 請選擇量化策略模組", strategy_options)
 
-if strategy_choice == "營收動能成長型(基本面優先)":
+if strategy_choice == "營收動能型 (基本面優先)":
     TARGET_MODE = "single_1"
     logic_html = """
     <div class="logic-grid">
@@ -53,7 +53,7 @@ if strategy_choice == "營收動能成長型(基本面優先)":
         <div class="logic-item"><div class="logic-index">08 / TRACKING</div><div class="logic-subtitle">相對強弱判定</div><div class="logic-desc">更新三大法人籌碼並 <span class="highlight">判定相對大盤強弱</span> 。</div></div>
     </div>
     """
-elif strategy_choice == "趨勢動能強勢型(技術面優先)":
+elif strategy_choice == "股價動能型 (技術面優先)":
     TARGET_MODE = "single_2"
     logic_html = """
     <div class="logic-grid">
@@ -147,6 +147,7 @@ else:
         update_date = now_taipei.strftime('%Y-%m-%d') if now_taipei.hour >= 20 else (now_taipei - datetime.timedelta(days=1)).strftime('%Y-%m-%d')
     
     m1, m2, m3 = st.columns(3)
+    # 判斷邏輯調整以對應新名稱關鍵字
     if "雙動能" in strategy_choice: sample_text = "極致交集比對"
     elif "營收動能" in strategy_choice: sample_text = "900+ 檔"
     else: sample_text = "1700+ 檔"
