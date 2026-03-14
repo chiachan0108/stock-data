@@ -31,7 +31,7 @@ if 'scan_completed' not in st.session_state: st.session_state['scan_completed'] 
 st.markdown('<h1 class="main-title">🛡️ QUANTUM SCANNER</h1>', unsafe_allow_html=True)
 st.markdown('<div class="update-note">🕒 數據公告：每日 20:00 定時更新資料庫</div>', unsafe_allow_html=True)
 
-# --- 策略選擇器 (新增第三選項) ---
+# --- 策略選擇器 ---
 strategy_options = [
     "營收動能成長型(基本面優先)", 
     "趨勢動能強勢型(技術面優先)",
@@ -93,7 +93,7 @@ if not st.session_state['scan_completed']:
                     (100, "🏆 執行相對強弱判定並產出最終精選報告...")
                 ]
                 for p, txt in steps:
-                    time.sleep(3.0)  # 維持完美的 15 秒儀式感
+                    time.sleep(3.0) 
                     p_bar.progress(p, text=txt)
                     status.write(txt)
                 
@@ -108,7 +108,6 @@ if not st.session_state['scan_completed']:
                         r = requests.get(url_2, timeout=10)
                         df_final = pd.read_csv(io.StringIO(r.text), on_bad_lines='skip') if r.status_code == 200 else pd.DataFrame()
                     else:
-                        # --- 💡 第三邏輯：雙引擎交集核心 ---
                         r1 = requests.get(url_1, timeout=10)
                         r2 = requests.get(url_2, timeout=10)
                         if r1.status_code == 200 and r2.status_code == 200:
@@ -118,12 +117,11 @@ if not st.session_state['scan_completed']:
                             if not df1.empty and not df2.empty:
                                 df1['代號'] = df1['代號'].astype(str)
                                 df2['代號'] = df2['代號'].astype(str)
-                                # 透過 pd.merge 取交集，並保留兩邊的關鍵特徵欄位
                                 df_final = pd.merge(
                                     df1, 
                                     df2[['代號', '240日報酬(%)', '20日報酬(%)', '近20日法人買賣超(張)']], 
                                     on='代號', 
-                                    how='inner' # inner join 確保只有兩邊都有的股票會留下
+                                    how='inner' 
                                 )
                             else:
                                 df_final = pd.DataFrame()
@@ -161,39 +159,28 @@ else:
     st.subheader(f"🏆 TOP PICKS")
     
     if not df.empty:
-        styled = df.style
         if "基本面優先" in strategy_choice:
-            styled = styled.background_gradient(subset=['年乖離(%)'], cmap='RdYlGn_r') \
-                           .background_gradient(subset=['近5日法人買賣超(張數)'], cmap='Greens') \
-                           .background_gradient(subset=['近一季相對大盤強弱'], cmap='RdYlGn')
-            st.dataframe(styled.format({
+            st.dataframe(df.style.format({
                 "現價": "{:.2f}", "季乖離(%)": "{:.2f}%", "年乖離(%)": "{:.2f}%", 
                 "近一季相對大盤強弱": "{:+.2f}%", "營收YoY(%)": "{:.2f}%", "營收MoM(%)": "{:.2f}%"
             }, na_rep="-"), use_container_width=True)
             
         elif "技術面優先" in strategy_choice:
-            styled = styled.background_gradient(subset=['近20日法人買賣超(張)'], cmap='Greens') \
-                           .background_gradient(subset=['240日報酬(%)'], cmap='RdYlGn') \
-                           .background_gradient(subset=['20日報酬(%)'], cmap='RdYlGn')
-            st.dataframe(styled.format({
+            st.dataframe(df.style.format({
                 "現價": "{:.2f}", "240日報酬(%)": "{:+.2f}%", "20日報酬(%)": "{:+.2f}%", 
                 "近20日法人買賣超(張)": "{:,.0f}"
             }, na_rep="-"), use_container_width=True)
             
         else:
-            # 💡 雙引擎交集專用表格渲染：同時展示兩邊的最強指標
-            styled = styled.background_gradient(subset=['近5日法人買賣超(張數)'], cmap='Greens') \
-                           .background_gradient(subset=['近20日法人買賣超(張)'], cmap='Greens') \
-                           .background_gradient(subset=['近一季相對大盤強弱'], cmap='RdYlGn') \
-                           .background_gradient(subset=['240日報酬(%)'], cmap='RdYlGn')
-            
-            # 整理顯示欄位順序
             display_cols = ['代號', '名稱', '產業', '現價', '營收YoY(%)', '近一季相對大盤強弱', '240日報酬(%)', '20日報酬(%)', '近5日法人買賣超(張數)', '近20日法人買賣超(張)']
-            st.dataframe(styled.format({
+            existing_cols = [c for c in display_cols if c in df.columns]
+            df_display = df[existing_cols]
+            
+            st.dataframe(df_display.style.format({
                 "現價": "{:.2f}", "近一季相對大盤強弱": "{:+.2f}%", "營收YoY(%)": "{:.2f}%", 
                 "240日報酬(%)": "{:+.2f}%", "20日報酬(%)": "{:+.2f}%",
                 "近5日法人買賣超(張數)": "{:,.0f}", "近20日法人買賣超(張)": "{:,.0f}"
-            }, na_rep="-")[display_cols], use_container_width=True)
+            }, na_rep="-"), use_container_width=True)
     else:
         st.warning("目前暫無同時符合兩大嚴苛策略的交集標的，請靜候市場輪動。")
     
