@@ -2,6 +2,13 @@ import streamlit as st
 import pandas as pd
 import datetime, io, time, requests
 
+# =============================================================================
+# [配置區]
+# =============================================================================
+# 根據 GitHub 儲存庫路徑設定
+GITHUB_USER = "chiachan0108"
+GITHUB_REPO = "stock-data"
+
 st.set_page_config(page_title="QUANTUM TECH SCANNER", layout="wide", initial_sidebar_state="collapsed")
 
 st.markdown("""
@@ -24,10 +31,10 @@ if 'scan_completed' not in st.session_state: st.session_state['scan_completed'] 
 st.markdown('<h1 class="main-title">🛡️ QUANTUM SCANNER</h1>', unsafe_allow_html=True)
 st.markdown('<div class="update-note">🕒 數據公告：每日 20:00 定時更新資料庫</div>', unsafe_allow_html=True)
 
-# --- 策略選擇器 ---
-strategy_choice = st.selectbox("📂 請選擇量化策略模組", ["策略一：QUANTUM 趨勢穩健型", "策略二：MOMENTUM 強勢動能型"])
+# --- 策略選擇器 (已更新名稱) ---
+strategy_choice = st.selectbox("📂 請選擇量化策略模組", ["營收動能成長型(基本面優先)", "趨勢動能強勢型(技術面優先)"])
 
-if strategy_choice == "策略一：QUANTUM 趨勢穩健型":
+if strategy_choice == "營收動能成長型(基本面優先)":
     TARGET_CSV = "daily_result.csv"
     logic_html = """
     <div class="logic-grid">
@@ -47,7 +54,7 @@ else:
     <div class="logic-grid">
         <div class="logic-item"><div class="logic-index">01 / SCOPE</div><div class="logic-subtitle">選股範圍</div><div class="logic-desc">全體上市櫃，<span class="highlight">嚴格排除 ETF、ETN、權證</span>等非普通股。</div></div>
         <div class="logic-item"><div class="logic-index">02 / LIQUIDITY</div><div class="logic-subtitle">流動性門檻</div><div class="logic-desc">近20日平均日成交量需大於 <span class="highlight">500張</span>。</div></div>
-        <div class="logic-item"><div class="logic-index">03 / TRACKING</div><div class="logic-subtitle">雙週期大盤對標</div><div class="logic-desc">近 240 日與 20 日績效 <span class="highlight">皆需超越 0050</span> (還原權值)。</div></div>
+        <div class="logic-item"><div class="logic-index">03 / TRACKING</div><div class="logic-subtitle">雙週期大盤對標</div><div class="logic-desc">近 240 日與 20 日績效 <span class="highlight">皆需超越大盤績效</span> 。</div></div>
         <div class="logic-item"><div class="logic-index">04 / SMART MONEY</div><div class="logic-subtitle">法人籌碼護航</div><div class="logic-desc">近 20 個交易日三大法人買賣超 <span class="highlight">大於 0 張</span>。</div></div>
     </div>
     """
@@ -59,9 +66,11 @@ if not st.session_state['scan_completed']:
     st.markdown(logic_html, unsafe_allow_html=True)
     _, btn_col, _ = st.columns([1, 2, 1])
     with btn_col:
-        if st.button(f"🚀 載入【{strategy_choice.split('：')[0]}】數據", type="primary", use_container_width=True):
+        # 修改按鈕顯示文字，擷取括號前的名稱
+        display_name = strategy_choice.split('(')[0]
+        if st.button(f"🚀 載入【{display_name}】數據", type="primary", use_container_width=True):
             try:
-                RAW_URL = f"https://raw.githubusercontent.com/chiachan0108/stock-data/refs/heads/main/{TARGET_CSV}"
+                RAW_URL = f"https://raw.githubusercontent.com/{GITHUB_USER}/{GITHUB_REPO}/main/{TARGET_CSV}"
                 r = requests.get(f"{RAW_URL}?t={int(time.time())}", timeout=10)
                 if r.status_code == 200:
                     st.session_state['temp_df'] = pd.read_csv(io.StringIO(r.text), on_bad_lines='skip')
@@ -73,11 +82,15 @@ else:
     df = st.session_state['temp_df']
     tz_delta = datetime.timedelta(hours=8)
     now_taipei = datetime.datetime.utcnow() + tz_delta
-    if not df.empty and '更新日期' in df.columns: update_date = df['更新日期'].iloc[0]
-    else: update_date = now_taipei.strftime('%Y-%m-%d') if now_taipei.hour >= 20 else (now_taipei - datetime.timedelta(days=1)).strftime('%Y-%m-%d')
+    
+    # 讀取 CSV 中的日期，若無則顯示預設日期
+    if not df.empty and '更新日期' in df.columns: 
+        update_date = df['更新日期'].iloc[0]
+    else: 
+        update_date = now_taipei.strftime('%Y-%m-%d') if now_taipei.hour >= 20 else (now_taipei - datetime.timedelta(days=1)).strftime('%Y-%m-%d')
     
     m1, m2, m3 = st.columns(3)
-    m1.metric("今日掃描樣本", "900+ 檔" if "QUANTUM" in strategy_choice else "1700+ 檔")
+    m1.metric("今日掃描樣本", "900+ 檔" if "營收動能" in strategy_choice else "1700+ 檔")
     m2.metric("符合門檻標的", f"{len(df)} 檔")
     m3.metric("數據最後更新", str(update_date))
     
@@ -86,16 +99,36 @@ else:
     
     if not df.empty:
         styled = df.style
-        if strategy_choice == "策略一：QUANTUM 趨勢穩健型":
-            # 💡 已對齊新欄位名稱：近5日法人買賣超(張數)
-            styled = styled.background_gradient(subset=['年乖離(%)'], cmap='RdYlGn_r').background_gradient(subset=['近5日法人買賣超(張數)'], cmap='Greens').background_gradient(subset=['近一季相對大盤強弱'], cmap='RdYlGn')
-            st.dataframe(styled.format({"現價": "{:.2f}", "季乖離(%)": "{:.2f}%", "年乖離(%)": "{:.2f}%", "近一季相對大盤強弱": "{:+.2f}%", "營收YoY(%)": "{:.2f}%", "營收MoM(%)": "{:.2f}%"}, na_rep="-"), use_container_width=True)
+        if strategy_choice == "營收動能成長型(基本面優先)":
+            # 漸層色配置與欄位格式化 (策略一)
+            styled = styled.background_gradient(subset=['年乖離(%)'], cmap='RdYlGn_r') \
+                           .background_gradient(subset=['近5日法人買賣超(張數)'], cmap='Greens') \
+                           .background_gradient(subset=['近一季相對大盤強弱'], cmap='RdYlGn')
+            st.dataframe(styled.format({
+                "現價": "{:.2f}", 
+                "季乖離(%)": "{:.2f}%", 
+                "年乖離(%)": "{:.2f}%", 
+                "近一季相對大盤強弱": "{:+.2f}%", 
+                "營收YoY(%)": "{:.2f}%", 
+                "營收MoM(%)": "{:.2f}%"
+            }, na_rep="-"), use_container_width=True)
         else:
-            styled = styled.background_gradient(subset=['近20日法人買賣超(張)'], cmap='Greens').background_gradient(subset=['240日報酬(%)'], cmap='RdYlGn').background_gradient(subset=['20日報酬(%)'], cmap='RdYlGn')
-            st.dataframe(styled.format({"現價": "{:.2f}", "240日報酬(%)": "{:+.2f}%", "20日報酬(%)": "{:+.2f}%", "近20日法人買賣超(張)": "{:,.0f}"}, na_rep="-"), use_container_width=True)
+            # 漸層色配置與欄位格式化 (策略二)
+            styled = styled.background_gradient(subset=['近20日法人買賣超(張)'], cmap='Greens') \
+                           .background_gradient(subset=['240日報酬(%)'], cmap='RdYlGn') \
+                           .background_gradient(subset=['20日報酬(%)'], cmap='RdYlGn')
+            st.dataframe(styled.format({
+                "現價": "{:.2f}", 
+                "240日報酬(%)": "{:+.2f}%", 
+                "20日報酬(%)": "{:+.2f}%", 
+                "近20日法人買賣超(張)": "{:,.0f}"
+            }, na_rep="-"), use_container_width=True)
+    else:
+        st.warning("目前暫無符合條件的選股結果。")
     
     output = io.BytesIO()
-    with pd.ExcelWriter(output, engine='xlsxwriter') as writer: df.to_excel(writer, index=False)
+    with pd.ExcelWriter(output, engine='xlsxwriter') as writer: 
+        df.to_excel(writer, index=False)
     st.download_button("📥 下載 Excel 完整報告", output.getvalue(), file_name=f"{TARGET_CSV.split('.')[0]}_{update_date}.xlsx")
 
 st.divider(); st.caption("QUANTUM DATA SYSTEM © 2026 | Minimalist Design. Maximum Insight.")
