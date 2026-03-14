@@ -10,19 +10,17 @@ GITHUB_REPO = "stock-data"
 
 st.set_page_config(page_title="QUANTUM TECH SCANNER", layout="wide", initial_sidebar_state="collapsed")
 
-# 💡 視覺優化：統一高亮樣式
+# 視覺優化 CSS
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap');
     
-    /* 基礎設定 */
     html, body, [class*="css"] { 
         font-family: 'Inter', 'Noto Sans TC', sans-serif; 
         background: linear-gradient(135deg, #090B10 0%, #111520 100%);
         color: #e2e8f0;
     }
 
-    /* 主標題設計 */
     .main-title { 
         font-family: 'JetBrains Mono', monospace; 
         font-weight: 700; 
@@ -35,7 +33,6 @@ st.markdown("""
         text-shadow: 0px 4px 20px rgba(0, 242, 255, 0.2);
     }
 
-    /* 副標題與公告 */
     .update-note { 
         font-family: 'JetBrains Mono', monospace;
         font-size: 0.85rem; 
@@ -49,7 +46,6 @@ st.markdown("""
         margin-top: 10px;
     }
 
-    /* 邏輯卡片網格 */
     .logic-grid { 
         display: grid; 
         grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); 
@@ -57,7 +53,6 @@ st.markdown("""
         margin-bottom: 40px; 
     }
 
-    /* 單一邏輯卡片 */
     .logic-item { 
         background: rgba(30, 41, 59, 0.4); 
         border: 1px solid rgba(148, 163, 184, 0.1); 
@@ -73,7 +68,6 @@ st.markdown("""
         border-color: rgba(0, 242, 255, 0.4);
     }
 
-    /* 卡片內容排版 */
     .logic-index { 
         font-family: 'JetBrains Mono', monospace; 
         font-size: 0.85rem; 
@@ -95,7 +89,6 @@ st.markdown("""
         line-height: 1.6; 
     }
 
-    /* 💡 醒目高亮：統一使用青藍色 */
     .highlight { 
         color: #ffffff; 
         font-weight: 600; 
@@ -105,7 +98,6 @@ st.markdown("""
         border-bottom: 1px solid #00f2ff;
     }
 
-    /* 進度條與按鈕客製化 */
     .stProgress > div > div > div > div { 
         background: linear-gradient(90deg, #00f2ff, #0072ff); 
     }
@@ -123,7 +115,7 @@ if 'scan_completed' not in st.session_state: st.session_state['scan_completed'] 
 st.markdown('<h1 class="main-title">QUANTUM SCANNER</h1>', unsafe_allow_html=True)
 st.markdown('<div class="update-note">SYS.STATUS: ONLINE | DATA_SYNC: DAILY 20:00 CST</div>', unsafe_allow_html=True)
 
-# --- 策略選擇器 (新增 A, B, C 前綴) ---
+# --- 策略選擇器 ---
 strategy_options = [
     "A. 營收動能型 (基本面優先)", 
     "B. 股價動能型 (技術面優先)",
@@ -148,12 +140,13 @@ if strategy_choice == "A. 營收動能型 (基本面優先)":
     """
 elif strategy_choice == "B. 股價動能型 (技術面優先)":
     TARGET_MODE = "single_2"
+    # 💡 依照您的需求更新 B 選項文字敘述
     logic_html = """
     <div class="logic-grid">
-        <div class="logic-item"><div class="logic-index">01 / SCOPE</div><div class="logic-subtitle">選股範圍</div><div class="logic-desc">全體上市櫃，嚴格排除 <span class="highlight">ETF、ETN、權證</span> 等非普通股。</div></div>
+        <div class="logic-item"><div class="logic-index">01 / SCOPE</div><div class="logic-subtitle">選股範圍</div><div class="logic-desc">全體上市櫃公司，嚴格排除 <span class="highlight">ETF、ETN、權證</span> 等非普通股。</div></div>
         <div class="logic-item"><div class="logic-index">02 / LIQUIDITY</div><div class="logic-subtitle">流動性門檻</div><div class="logic-desc">近20日平均日成交量需大於 <span class="highlight">500張</span>。</div></div>
-        <div class="logic-item"><div class="logic-index">03 / TRACKING</div><div class="logic-subtitle">雙週期大盤對標</div><div class="logic-desc">近 240 日與 20 日績效皆需 <span class="highlight">超越 0050</span> (還原權值)。</div></div>
-        <div class="logic-item"><div class="logic-index">04 / SMART MONEY</div><div class="logic-subtitle">法人籌碼護航</div><div class="logic-desc">近 20 個交易日三大法人買賣超 <span class="highlight">大於 0 張</span>。</div></div>
+        <div class="logic-item"><div class="logic-index">03 / TRACKING</div><div class="logic-subtitle">雙週期大盤對標</div><div class="logic-desc">股價近 240 日與 20 日績效皆需 <span class="highlight">超越大盤同期績效</span>。</div></div>
+        <div class="logic-item"><div class="logic-index">04 / SMART MONEY</div><div class="logic-subtitle">法人籌碼護航</div><div class="logic-desc">近 20 個交易日三大法人呈現 <span class="highlight">淨買超</span>。</div></div>
     </div>
     """
 else:
@@ -174,7 +167,7 @@ if not st.session_state['scan_completed']:
     st.markdown(logic_html, unsafe_allow_html=True)
     _, btn_col, _ = st.columns([1, 2, 1])
     with btn_col:
-        # 按鈕顯示文字取第一個前綴後的主名稱
+        # 按鈕名稱解析
         display_name = strategy_choice.split('. ')[1].split('(')[0].strip()
         if st.button(f"🚀 啟動【{display_name}】AI量化篩選系統", type="primary", use_container_width=True):
             p_bar = st.progress(0, text="📡 正在連接量化數據終端...")
