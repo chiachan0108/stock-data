@@ -123,7 +123,6 @@ strategy_options = [
 ]
 st.markdown("### ⚙️ STRATEGY CONFIGURATION")
 
-# 下拉選單在掃描完成後會鎖定
 strategy_choice = st.selectbox(
     "請選擇量化策略模組", 
     strategy_options, 
@@ -142,7 +141,7 @@ if strategy_choice == "A. 營收動能型 (基本面優先)":
         <div class="logic-item"><div class="logic-index">05 / SCALE</div><div class="logic-subtitle">營收規模</div><div class="logic-desc">近 12 個月累積營收 (LTM) 創下 <span class="highlight">5年來最高紀錄</span>。</div></div>
         <div class="logic-item"><div class="logic-index">06 / MOMENTUM</div><div class="logic-subtitle">創高動能</div><div class="logic-desc">近 6 個月內至少有單月營收創下 <span class="highlight">歷史新高</span>。</div></div>
         <div class="logic-item"><div class="logic-index">07 / DYNAMICS</div><div class="logic-subtitle">季度動能</div><div class="logic-desc">確保 <span class="highlight">近1季 YoY > 0</span>，營運動能持續擴張。</div></div>
-        <div class="logic-item"><div class="logic-index">08 / TRACKING</div><div class="logic-subtitle">相對強弱判定</div><div class="logic-desc">更新三大法人籌碼並 <span class="highlight">判定相對大盤強弱</span>。</div></div>
+        <div class="logic-item"><div class="logic-index">08 / TRACKING</div><div class="logic-subtitle">新版指標</div><div class="logic-desc">新增計算 <span class="highlight">今年以來累積營收 YoY(%)</span> 。</div></div>
     </div>
     """
 elif strategy_choice == "B. 股價動能型 (技術面優先)":
@@ -206,9 +205,10 @@ if not st.session_state['scan_completed']:
                             df1 = pd.read_csv(io.StringIO(r1.text), on_bad_lines='skip')
                             df2 = pd.read_csv(io.StringIO(r2.text), on_bad_lines='skip')
                             if not df1.empty and not df2.empty:
-                                df1['代號'] = df1['代號'].astype(str)
-                                df2['代號'] = df2['代號'].astype(str)
-                                df_final = pd.merge(df1, df2[['代號', '240日報酬(%)', '20日報酬(%)', '近20日法人買賣超(張)']], on='代號', how='inner')
+                                # 💡 修正合併金鑰：從 "代號" 改為 "股價代號"
+                                df1['股價代號'] = df1['股價代號'].astype(str)
+                                df2['股價代號'] = df2['股價代號'].astype(str)
+                                df_final = pd.merge(df1, df2[['股價代號', '240日報酬(%)', '20日報酬(%)', '近20日法人買賣超(張)']], on='股價代號', how='inner')
                             else: df_final = pd.DataFrame()
                         else: df_final = pd.DataFrame()
 
@@ -216,7 +216,6 @@ if not st.session_state['scan_completed']:
                         st.session_state['temp_df'] = df_final
                         st.session_state['scan_completed'] = True
                         status.update(label="✅ 篩選完成", state="complete", expanded=False)
-                        # 💡 已移除 st.balloons()
                         st.rerun()
                     else: st.error(f"數據讀取失敗，請確認資料庫狀態。")
                 except Exception: st.error("連線超時，請稍後再試。")
@@ -241,7 +240,6 @@ else:
     
     st.markdown("<br>", unsafe_allow_html=True)
     
-    # 醒目且易點擊的返回按鈕
     st.button(
         "🔄 重新選擇策略 (返回主選單)", 
         on_click=lambda: st.session_state.update({"scan_completed": False}), 
@@ -253,14 +251,28 @@ else:
     st.markdown("### 🏆 QUANTUM TOP PICKS")
     
     if not df.empty:
+        # 💡 使用全新欄位名稱進行格式化輸出
         if "A." in strategy_choice:
-            st.dataframe(df.style.format({"現價": "{:.2f}", "季乖離(%)": "{:.2f}%", "年乖離(%)": "{:.2f}%", "近一季相對大盤強弱": "{:+.2f}%", "營收YoY(%)": "{:.2f}%", "營收MoM(%)": "{:.2f}%"}, na_rep="-"), use_container_width=True)
+            display_cols_a = ["更新日期", "股價代號", "公司名稱", "產業別", "現價", "季乖離", "年乖離", "月營收MoM(%)", "月營收YoY(%)", "今年以來累積營收YoY(%)"]
+            existing_cols_a = [c for c in display_cols_a if c in df.columns]
+            st.dataframe(df[existing_cols_a].style.format({
+                "現價": "{:.2f}", "季乖離": "{:.2f}%", "年乖離": "{:.2f}%", 
+                "月營收MoM(%)": "{:.2f}%", "月營收YoY(%)": "{:.2f}%", "今年以來累積營收YoY(%)": "{:.2f}%"
+            }, na_rep="-"), use_container_width=True)
+            
         elif "B." in strategy_choice:
-            st.dataframe(df.style.format({"現價": "{:.2f}", "240日報酬(%)": "{:+.2f}%", "20日報酬(%)": "{:+.2f}%", "近20日法人買賣超(張)": "{:,.0f}"}, na_rep="-"), use_container_width=True)
+            st.dataframe(df.style.format({
+                "現價": "{:.2f}", "240日報酬(%)": "{:+.2f}%", "20日報酬(%)": "{:+.2f}%", "近20日法人買賣超(張)": "{:,.0f}"
+            }, na_rep="-"), use_container_width=True)
+            
         else:
-            display_cols = ['代號', '名稱', '產業', '現價', '營收YoY(%)', '近一季相對大盤強弱', '240日報酬(%)', '20日報酬(%)', '近5日法人買賣超(張數)', '近20日法人買賣超(張)']
-            existing_cols = [c for c in display_cols if c in df.columns]
-            st.dataframe(df[existing_cols].style.format({"現價": "{:.2f}", "近一季相對大盤強弱": "{:+.2f}%", "營收YoY(%)": "{:.2f}%", "240日報酬(%)": "{:+.2f}%", "20日報酬(%)": "{:+.2f}%", "近5日法人買賣超(張數)": "{:,.0f}", "近20日法人買賣超(張)": "{:,.0f}"}, na_rep="-"), use_container_width=True)
+            display_cols_c = ['股價代號', '公司名稱', '產業別', '現價', '今年以來累積營收YoY(%)', '240日報酬(%)', '20日報酬(%)', '近20日法人買賣超(張)']
+            existing_cols_c = [c for c in display_cols_c if c in df.columns]
+            st.dataframe(df[existing_cols_c].style.format({
+                "現價": "{:.2f}", "今年以來累積營收YoY(%)": "{:.2f}%", 
+                "240日報酬(%)": "{:+.2f}%", "20日報酬(%)": "{:+.2f}%",
+                "近20日法人買賣超(張)": "{:,.0f}"
+            }, na_rep="-"), use_container_width=True)
     else:
         st.info("💡 目前暫無符合條件的標的，請靜候市場輪動。")
     
