@@ -5,7 +5,6 @@ from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-# 雲端 Token 配置 (Secrets)
 GITHUB_TOKEN = os.getenv("G_TOKEN")
 FINMIND_TOKEN_1 = os.getenv("FM_TOKEN_1")
 FINMIND_TOKEN_2 = os.getenv("FM_TOKEN_2")
@@ -16,26 +15,23 @@ CACHE_DIR = os.path.join(BASE_PATH, "cache")
 if not os.path.exists(CACHE_DIR): os.makedirs(CACHE_DIR, exist_ok=True)
 
 fm_session = requests.Session()
-retry = Retry(total=3, backoff_factor=1, status_forcelist=[429, 500, 502, 503, 504])
+retry = Retry(total=4, backoff_factor=1, status_forcelist=[429, 500, 502, 503, 504])
 fm_session.mount("https://", HTTPAdapter(pool_connections=25, pool_maxsize=25, max_retries=retry))
 
-# --- 自 Colab 同步的核心函數 ---
 def get_pure_taiwan_stocks(token):
-    """獲取全體上市櫃標的，並嚴格排除 ETF、ETN、權證等非普通股"""
     cache_path = os.path.join(CACHE_DIR, "TaiwanStockInfo_Global.csv")
     if os.path.exists(cache_path) and (time.time() - os.path.getmtime(cache_path)) / (24 * 3600) < 30:
         df = pd.read_csv(cache_path, dtype={'stock_id': str})
     else:
         params = {"dataset": "TaiwanStockInfo", "token": token}
         try:
-            resp = fm_session.get("https://api.finmindtrade.com/api/v4/data", params=params).json()
+            resp = fm_session.get("https://api.finmindtrade.com/api/v4/data", params=params, timeout=15).json()
             if resp.get("msg") == "success":
                 df = pd.DataFrame(resp.get("data", []))
                 df.to_csv(cache_path, index=False)
             else: return pd.DataFrame()
         except: return pd.DataFrame()
     
-    # 排除非普通股 (只留長度為 4 碼的標的，且排除 ETF 類別)
     exclude_keywords = ['ETF', 'ETN', '存託憑證', '受益證券']
     df_pure = df[
         (df['stock_id'].astype(str).str.len() == 4) & 
@@ -45,7 +41,6 @@ def get_pure_taiwan_stocks(token):
     return df_pure
 
 def get_institutional_net_buy(sid, token, days, force_zero=False):
-    """抓取三大法人買賣超 (支援 5 日與 20 日)"""
     sid = str(sid)
     today_str = datetime.date.today().strftime('%Y-%m-%d')
     cache_path = os.path.join(CACHE_DIR, f"{sid}_inst{days}d_{today_str}.csv")
@@ -69,7 +64,6 @@ def get_institutional_net_buy(sid, token, days, force_zero=False):
     return 0
 
 def check_refined_fundamentals(sid, token):
-    """基本面檢定 (策略 1 使用)"""
     sid = str(sid)
     cache_path = os.path.join(CACHE_DIR, f"{sid}_rev.csv")
     df = None
@@ -119,7 +113,6 @@ def run_full_pipeline():
     
     print(f"🔍 啟動今日 ({today_str}) 雙軌量化掃描任務...")
     
-    # --- 共通數據準備 ---
     print("📈 下載 0050 基準資料...")
     tw50 = yf.download("0050.TW", period="350d", auto_adjust=True, progress=False)
     tw50_ret_60 = float((tw50['Close'].iloc[-1] / tw50['Close'].iloc[-61]) - 1)
@@ -127,11 +120,9 @@ def run_full_pipeline():
     tw50_ret_20 = float((tw50['Close'].iloc[-1] / tw50['Close'].iloc[-20]) - 1)
 
     print("📊 獲取股票清單與歷史數據...")
-    # 使用 Token 1 取得清單，涵蓋全體上市櫃普通股
     pool_all = get_pure_taiwan_stocks(FINMIND_TOKEN_1)
     ticker_map_all = {str(r['stock_id']): f"{r['stock_id']}.TW" if r['type']=='twse' else f"{r['stock_id']}.TWO" for _, r in pool_all.iterrows()}
     
-    # 策略 1 (Quantum) 僅限電子股
     elec_industries = ['半導體業', '電腦及週邊設備業', '光電業', '通信網路業', '電子零組件業', '電子通路業', '資訊服務業', '其他電子業']
     pool_elec = pool_all[pool_all['industry_category'].isin(elec_industries)]
     elec_sids = pool_elec['stock_id'].astype(str).tolist()
@@ -170,7 +161,7 @@ def run_full_pipeline():
                     "更新日期": today_str, "代號": sid, "名稱": row['stock_name'], "產業": row['industry_category'],
                     "現價": round(metrics_1[sid]["現價"], 2), "季乖離(%)": metrics_1[sid]["季乖離"], "年乖離(%)": metrics_1[sid]["年乖離"],
                     "近一季相對大盤強弱": metrics_1[sid]["近一季相對大盤強弱"], "營收MoM(%)": mom, "營收YoY(%)": yoy,
-                    "近5日三大法人買賣超(張數)": chip_net
+                    "近5日法人買賣超(張數)": chip_net  # 💡 已修正欄位名稱
                 })
     
     df_quantum = pd.DataFrame(final_list_1).sort_values(by="近一季相對大盤強弱", ascending=False) if final_list_1 else pd.DataFrame(columns=["代號"])
