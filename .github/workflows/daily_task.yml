@@ -1,0 +1,25 @@
+name: Daily Stock Quant Task
+on:
+  schedule:
+    - cron: '50 11 * * *' # 台北時間每日 19:50 執行
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+      - name: Install Dependencies
+        run: pip install pandas yfinance requests openpyxl xlsxwriter
+      - name: Run Quant Engine
+        env:
+          # 💡 這裡對應你現有的 Secret 名稱
+          GH_TOKEN: ${{ secrets.G_TOKEN }}
+          FM_TOKEN_1: ${{ secrets.FM_TOKEN_1 }}
+          FM_TOKEN_2: ${{ secrets.FM_TOKEN_2 }}
+        run: python cloud_engine.py
