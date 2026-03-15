@@ -10,7 +10,7 @@ GITHUB_REPO = "stock-data"
 
 st.set_page_config(page_title="QUANTUM TECH SCANNER | 台股智能量化篩選", layout="wide", initial_sidebar_state="collapsed")
 
-# 💡 視覺系統：含手機防裁切與高質感 UI
+# 💡 終極視覺系統：修正版面跑位與手機優化
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600;700&family=Noto+Sans+TC:wght@100;300;400;500;700&display=swap');
@@ -35,7 +35,7 @@ st.markdown("""
 
     .status-pill {
         display: inline-flex; align-items: center; background: rgba(0, 242, 255, 0.05);
-        border: 1px solid rgba(0, 242, 255, 0.2); padding: clamp(4px, 1.5vw, 6px) clamp(12px, 3vw, 16px); border-radius: 50px;
+        border: 1px solid rgba(0, 242, 255, 0.2); padding: 6px 16px; border-radius: 50px;
         font-size: clamp(0.7rem, 2.5vw, 0.8rem); color: #00f2ff; margin-bottom: 30px; margin-top: 20px;
     }
     .pulse-dot {
@@ -51,65 +51,65 @@ st.markdown("""
 
     .config-container {
         background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255, 255, 255, 0.05);
-        border-radius: 20px; padding: clamp(16px, 5vw, 30px); margin-bottom: clamp(20px, 6vw, 40px); 
+        border-radius: 20px; padding: clamp(16px, 5vw, 30px); margin-bottom: 40px; 
         box-shadow: inset 0 1px 1px rgba(255,255,255,0.05);
     }
     .section-header {
-        font-family: 'JetBrains Mono', monospace !important; font-size: 0.8rem !important; letter-spacing: 2px !important;
-        color: #64748b; margin-bottom: 15px; display: flex; align-items: center;
+        font-family: 'JetBrains Mono', monospace !important; font-size: 0.85rem !important; letter-spacing: 2px !important;
+        color: #64748b; margin-bottom: 20px; display: flex; align-items: center;
     }
     .section-header::after {
         content: ""; flex: 1; height: 1px; background: rgba(100, 116, 139, 0.2); margin-left: 15px;
     }
 
-    .logic-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: clamp(12px, 4vw, 16px); }
+    /* 💡 邏輯網格修正：確保 8 項邏輯整齊排列 */
+    .logic-grid { 
+        display: grid; 
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
+        gap: clamp(12px, 3vw, 20px); 
+    }
     .logic-item { 
         background: linear-gradient(180deg, rgba(30, 41, 59, 0.5) 0%, rgba(15, 23, 42, 0.5) 100%); 
         border: 1px solid rgba(148, 163, 184, 0.1); border-top: 3px solid rgba(0, 242, 255, 0.25);
-        border-radius: 16px; padding: clamp(16px, 4vw, 22px); transition: all 0.4s ease;
+        border-radius: 16px; padding: 22px; transition: all 0.4s ease;
+        display: flex; flex-direction: column;
     }
     .logic-item:hover { 
         transform: translateY(-5px); border-top: 3px solid #00f2ff;
         background: linear-gradient(180deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 0.8) 100%);
+        box-shadow: 0 15px 35px -10px rgba(0,0,0,0.5);
     }
     
-    .logic-header { display: flex; align-items: center; margin-bottom: 8px; gap: 8px; }
+    .logic-header { display: flex; align-items: center; margin-bottom: 12px; gap: 8px; }
     .logic-icon { font-size: 1.1rem; }
     .logic-index { font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: #00f2ff; opacity: 0.9; }
-    .logic-subtitle { font-size: 1.1rem; font-weight: 700; color: #ffffff; margin-bottom: 6px; }
-    .logic-desc { font-size: 0.85rem; color: #94a3b8; line-height: 1.6; font-weight: 300; }
+    .logic-subtitle { font-size: 1.15rem; font-weight: 700; color: #ffffff; margin-bottom: 8px; }
+    .logic-desc { font-size: 0.9rem; color: #94a3b8; line-height: 1.6; font-weight: 300; }
     .highlight { color: #ffffff; font-weight: 600; background: rgba(0, 242, 255, 0.15); padding: 2px 6px; border-radius: 4px; border-bottom: 1px solid #00f2ff; }
 
     .disclaimer-box {
-        background: rgba(15, 23, 42, 0.6); border-left: 3px solid #334155; padding: clamp(12px, 4vw, 20px);
-        border-radius: 8px; margin: clamp(20px, 6vw, 40px) 0; font-size: 0.8rem; color: #64748b; line-height: 1.6;
+        background: rgba(15, 23, 42, 0.6); border-left: 3px solid #334155; padding: 20px;
+        border-radius: 8px; margin: 40px 0; font-size: 0.85rem; color: #64748b; line-height: 1.6;
     }
 
-    /* 下拉選單終極修正 (解決手機裁切問題) */
+    /* 下拉選單文字修正 */
     .stSelectbox [data-baseweb="select"] {
         background-color: rgba(15, 23, 42, 0.7) !important;
-        border-radius: 12px !important;
-        border: 1px solid rgba(0, 242, 255, 0.3) !important;
-        min-height: 56px !important;
-        display: flex !important; align-items: center !important;
+        border-radius: 12px !important; border: 1px solid rgba(0, 242, 255, 0.3) !important;
+        min-height: 56px !important; display: flex !important; align-items: center !important;
     }
-    
     .stSelectbox div[data-baseweb="select"] > div {
-        line-height: 1.5 !important; padding-top: 0 !important; padding-bottom: 0 !important;
-        display: flex !important; align-items: center !important;
+        line-height: 1.5 !important; display: flex !important; align-items: center !important;
         font-size: 0.95rem !important; text-align: left !important;
-    }
-
-    @media (max-width: 768px) {
-        .stSelectbox div[data-baseweb="select"] > div { font-size: 0.9rem !important; line-height: 1.5 !important; }
     }
 
     /* 漸層按鈕 */
     .stButton > button {
         background: linear-gradient(135deg, #00f2ff 0%, #0072ff 100%);
-        color: white; border: none; border-radius: 12px; font-weight: 600; letter-spacing: 1px;
-        padding: clamp(10px, 3vw, 14px) 24px; box-shadow: 0 4px 15px rgba(0, 114, 255, 0.3); transition: all 0.3s ease;
-        width: 100%; min-height: 48px;
+        color: white !important; border: none !important; border-radius: 12px !important; 
+        font-weight: 600 !important; letter-spacing: 1px !important;
+        padding: 14px 24px !important; box-shadow: 0 4px 15px rgba(0, 114, 255, 0.3) !important; 
+        width: 100% !important; min-height: 48px !important; transition: all 0.3s ease !important;
     }
     .stButton > button:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0, 114, 255, 0.5); }
     </style>
@@ -144,6 +144,7 @@ if not st.session_state['scan_completed']:
     strategy_options = ["A. 營收動能型 (基本面優先)", "B. 股價動能型 (技術面優先)", "C. 營收、股價動能雙吻合"]
     strategy_choice = st.selectbox("量化策略模組", strategy_options, label_visibility="collapsed")
     
+    # 💡 修正 A 策略的嵌套 Div 錯誤
     if "A." in strategy_choice:
         TARGET_MODE = "single_1"
         logic_html = """
@@ -152,7 +153,7 @@ if not st.session_state['scan_completed']:
             <div class="logic-item"><div class="logic-header"><span class="logic-icon">🌊</span><span class="logic-index">02 / LIQUIDITY</span></div><div class="logic-subtitle">流動性門檻</div><div class="logic-desc">近20日平均日成交量需大於 <span class="highlight">1,000張</span>。</div></div>
             <div class="logic-item"><div class="logic-header"><span class="logic-icon">📊</span><span class="logic-index">03 / LEVEL</span></div><div class="logic-subtitle">技術位階</div><div class="logic-desc">股價需穩健站於長線生命線 <span class="highlight">MA240</span> 之上。</div></div>
             <div class="logic-item"><div class="logic-header"><span class="logic-icon">📈</span><span class="logic-index">04 / TREND</span></div><div class="logic-subtitle">趨勢排列</div><div class="logic-desc"><span class="highlight">MA60 > MA240</span>，呈現多頭排列。</div></div>
-            <div class="logic-item"><div class="logic-item"><div class="logic-header"><span class="logic-icon">👑</span><span class="logic-index">05 / SCALE</span></div><div class="logic-subtitle">營收規模</div><div class="logic-desc">近 12 個月累積營收 (LTM) 創下 <span class="highlight">5年來最高紀錄</span>。</div></div>
+            <div class="logic-item"><div class="logic-header"><span class="logic-icon">👑</span><span class="logic-index">05 / SCALE</span></div><div class="logic-subtitle">營收規模</div><div class="logic-desc">近 12 個月累積營收 (LTM) 創下 <span class="highlight">5年來最高紀錄</span>。</div></div>
             <div class="logic-item"><div class="logic-header"><span class="logic-icon">🔥</span><span class="logic-index">06 / MOMENTUM</span></div><div class="logic-subtitle">創高動能</div><div class="logic-desc">近 6 個月內至少有單月營收創下 <span class="highlight">歷史新高</span>。</div></div>
             <div class="logic-item"><div class="logic-header"><span class="logic-icon">⚡</span><span class="logic-index">07 / DYNAMICS</span></div><div class="logic-subtitle">雙重成長</div><div class="logic-desc">確保近1季 YoY > 0 且 <span class="highlight">今年累計 YoY > 0</span>。</div></div>
             <div class="logic-item"><div class="logic-header"><span class="logic-icon">🏦</span><span class="logic-index">08 / TRACKING</span></div><div class="logic-subtitle">法人佈局</div><div class="logic-desc">追蹤近 <span class="highlight">20 日三大法人</span> 買賣超張數。</div></div>
@@ -161,10 +162,10 @@ if not st.session_state['scan_completed']:
         TARGET_MODE = "single_2"
         logic_html = """
         <div class="logic-grid">
-            <div class="logic-item"><div class="logic-header"><span class="logic-icon">🎯</span><span class="logic-index">01 / SCOPE</span></div><div class="logic-subtitle">選股範圍</div><div class="logic-desc">全體上市櫃公司，嚴格排除 <span class="highlight">ETF、ETN、權證</span> 等非普通股。</div></div>
-            <div class="logic-item"><div class="logic-header"><span class="logic-icon">🌊</span><span class="logic-index">02 / LIQUIDITY</span></div><div class="logic-subtitle">流動性門檻</div><div class="logic-desc">近20日平均日成交量需大於 <span class="highlight">500張</span>。</div></div>
-            <div class="logic-item"><div class="logic-header"><span class="logic-icon">⚖️</span><span class="logic-index">03 / TRACKING</span></div><div class="logic-subtitle">雙週期比對</div><div class="logic-desc">股價近 240 日與 20 日績效皆需 <span class="highlight">超越大盤同期績效</span>。</div></div>
-            <div class="logic-item"><div class="logic-header"><span class="logic-icon">🏦</span><span class="logic-index">04 / SMART MONEY</span></div><div class="logic-subtitle">法人護航</div><div class="logic-desc">近 20 個交易日三大法人呈現 <span class="highlight">淨買超</span>。</div></div>
+            <div class="logic-item"><div class="logic-item-content"><div class="logic-header"><span class="logic-icon">🎯</span><span class="logic-index">01 / SCOPE</span></div><div class="logic-subtitle">選股範圍</div><div class="logic-desc">全體上市櫃公司，嚴格排除 <span class="highlight">ETF、ETN、權證</span> 等非普通股。</div></div></div>
+            <div class="logic-item"><div class="logic-item-content"><div class="logic-header"><span class="logic-icon">🌊</span><span class="logic-index">02 / LIQUIDITY</span></div><div class="logic-subtitle">流動性門檻</div><div class="logic-desc">近20日平均日成交量需大於 <span class="highlight">500張</span>。</div></div></div>
+            <div class="logic-item"><div class="logic-item-content"><div class="logic-header"><span class="logic-icon">⚖️</span><span class="logic-index">03 / TRACKING</span></div><div class="logic-subtitle">雙週期比對</div><div class="logic-desc">股價近 240 日與 20 日績效皆需 <span class="highlight">超越大盤同期績效</span>。</div></div></div>
+            <div class="logic-item"><div class="logic-item-content"><div class="logic-header"><span class="logic-icon">🏦</span><span class="logic-index">04 / SMART MONEY</span></div><div class="logic-subtitle">法人護航</div><div class="logic-desc">近 20 個交易日三大法人呈現 <span class="highlight">淨買超</span>。</div></div></div>
         </div>"""
     else:
         TARGET_MODE = "dual_intersection"
@@ -183,7 +184,6 @@ if not st.session_state['scan_completed']:
 
     _, btn_col, _ = st.columns([1, 2, 1])
     with btn_col:
-        # 💡 統一按鈕文字為「🚀 啟動AI量化篩選」
         if st.button("🚀 啟動AI量化篩選", use_container_width=True):
             p_bar = st.progress(0, text="📡 正在連接數據終端...")
             with st.status("正在執行深度運算...", expanded=True) as status:
