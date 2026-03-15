@@ -10,7 +10,7 @@ GITHUB_REPO = "stock-data"
 
 st.set_page_config(page_title="QUANTUM TECH SCANNER", layout="wide", initial_sidebar_state="collapsed")
 
-# 💡 視覺系統 18.5：完整修復版 (包含圖塊、高亮與修正)
+# 💡 視覺系統 19.0：復原質感免責聲明、移除提醒文字、修正所有已知問題
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&family=Noto+Sans+TC:wght@100;300;400;500;700&display=swap');
@@ -20,6 +20,7 @@ st.markdown("""
         background-color: #0b0f19 !important; color: #e2e8f0 !important;
     }
 
+    /* 頂部區域 */
     .header-group { margin-top: -45px; margin-bottom: 10px; }
     .main-title { 
         font-family: 'JetBrains Mono', monospace !important; font-weight: 700; letter-spacing: -2px; 
@@ -39,6 +40,7 @@ st.markdown("""
     }
     @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
 
+    /* 標題強制不換行與手機優化 */
     .section-label {
         font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: #00f2ff;
         letter-spacing: 2px; margin-top: 20px; margin-bottom: 12px; font-weight: 600; text-transform: uppercase;
@@ -47,24 +49,16 @@ st.markdown("""
     .section-label::after {
         content: ""; flex: 1; height: 1px; background: linear-gradient(90deg, rgba(0, 242, 255, 0.3), transparent); margin-left: 15px;
     }
-
     @media (max-width: 480px) { .section-label { font-size: 0.7rem !important; letter-spacing: 1px !important; } }
 
-    /* 下拉選單 */
-    div[data-testid="stSelectbox"] { margin-top: -5px !important; margin-bottom: 20px !important; }
-    div[data-testid="stSelectbox"] label { display: none !important; }
-    .stSelectbox [data-baseweb="select"] {
-        background-color: #161b2a !important; border: 1px solid rgba(0, 242, 255, 0.3) !important;
-        border-radius: 12px !important; height: 52px !important;
-    }
-
-    /* 4 欄圖塊 */
+    /* 4 欄邏輯圖塊 */
     .logic-grid { display: grid; gap: 15px; grid-template-columns: repeat(1, 1fr); margin-bottom: 30px; }
     @media (min-width: 1024px) { .logic-grid { grid-template-columns: repeat(4, 1fr) !important; } }
     .logic-item { 
         background: #161b22; border: 1px solid rgba(148, 163, 184, 0.15); 
         border-top: 3px solid #00f2ff; border-radius: 12px; padding: 20px; transition: 0.3s;
     }
+    .logic-item:hover { background: #1c2331; transform: translateY(-3px); }
     .logic-header { display: flex; align-items: center; margin-bottom: 12px; gap: 10px; }
     .logic-icon { font-size: 1.2rem; }
     .logic-index { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: #00f2ff; }
@@ -72,21 +66,27 @@ st.markdown("""
     .logic-desc { font-size: 0.85rem; color: #94a3b8; line-height: 1.6; }
     .highlight { color: #ffffff; font-weight: 600; background: rgba(0, 242, 255, 0.1); padding: 0 4px; border-bottom: 1px solid #00f2ff; }
 
+    /* 表格與按鈕 */
     [data-testid="stDataFrame"] {
         background: rgba(15, 23, 42, 0.5); padding: 12px; border-radius: 16px;
         border: 1px solid rgba(0, 242, 255, 0.15); box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
-    }
-
-    .disclaimer-box {
-        background: rgba(30, 41, 59, 0.3); backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.05); border-left: 4px solid #00f2ff; 
-        padding: 24px; border-radius: 12px; margin: 40px 0; display: flex; align-items: flex-start; gap: 16px;
     }
     .stButton > button {
         background: linear-gradient(90deg, #00f2ff, #0072ff) !important;
         color: white !important; border: none !important; border-radius: 8px !important; 
         font-weight: 700 !important; letter-spacing: 1px; padding: 12px 0 !important; width: 100% !important; min-height: 50px !important;
     }
+
+    /* 💡 復原：磨砂玻璃免責聲明 */
+    .disclaimer-box {
+        background: rgba(30, 41, 59, 0.3); backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.05); border-left: 4px solid #00f2ff; 
+        padding: 24px; border-radius: 12px; margin: 40px 0; display: flex; align-items: flex-start; gap: 16px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    }
+    .disclaimer-icon { font-size: 1.4rem; filter: drop-shadow(0 0 8px rgba(0, 242, 255, 0.4)); margin-top: -2px; }
+    .disclaimer-text { font-size: 0.88rem; color: #94a3b8; line-height: 1.8; letter-spacing: 0.5px; }
+    .disclaimer-bold { color: #f8fafc; font-weight: 600; margin-bottom: 4px; display: block; font-size: 0.95rem; }
     </style>
 """, unsafe_allow_html=True)
 
@@ -111,6 +111,7 @@ if 'scan_completed' not in st.session_state: st.session_state['scan_completed'] 
 now_taipei = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=8)
 data_date = now_taipei.strftime('%Y-%m-%d') if now_taipei.hour >= 20 else (now_taipei - datetime.timedelta(days=1)).strftime('%Y-%m-%d')
 
+# 頂部渲染
 st.markdown(f'''
     <div class="header-group">
         <h1 class="main-title">QUANTUM SCANNER</h1>
@@ -129,7 +130,6 @@ if not st.session_state['scan_completed']:
     
     st.markdown("<div class='section-label'>SYSTEM ARCHITECTURE 系統核心邏輯</div>", unsafe_allow_html=True)
 
-    # 💡 補回所有消失的圖塊內容
     if "A." in strategy_choice:
         TARGET_MODE = "single_1"
         logic_html = """<div class="logic-grid">
@@ -187,26 +187,25 @@ if not st.session_state['scan_completed']:
                         st.session_state['selected_strategy'] = strategy_choice
                         st.session_state['scan_completed'] = True
                         st.rerun()
-                except Exception as e: st.error(f"⚠️ 連線異常：{str(e)}")
+                except Exception as e: st.error(f"⚠️ 連線異常，請確認資料源：{str(e)}")
 else:
     df = st.session_state['temp_df']
     strategy_choice = st.session_state['selected_strategy']
-    
     m1, m2, m3 = st.columns(3)
     m1.metric("🎯 符合標的", f"{len(df)} 檔")
     m2.metric("📅 數據基準日", str(data_date))
     m3.metric("🧠 策略模組", strategy_choice.split('.')[0])
     st.button("🔄 重新選擇策略", on_click=lambda: st.session_state.update({"scan_completed": False}), use_container_width=True)
+    st.markdown(f"### 🏆 TOP PICKS : {strategy_choice}")
     
-    # 💡 數據渲染區 (包含錯字修正)
+    # 💡 渲染表格：補回轉折值欄位與修正錯字
     if "A." in strategy_choice:
         display_cols = ["股價代號", "公司名稱", "產業別", "現價", "季乖離", "年乖離", "月營收MoM(%)", "月營收YoY(%)", "今年以來累積營收YoY(%)", "近20日法人買賣超(張數)"]
         color_cols = ["季乖離", "年乖離", "月營收MoM(%)", "月營收YoY(%)", "今年以來累積營收YoY(%)", "近20日法人買賣超(張數)"]
         format_dict = {c: "{:.2f}" for c in ["現價", "季乖離", "年乖離", "月營收MoM(%)", "月營收YoY(%)", "今年以來累積營收YoY(%)"]}
         format_dict["近20日法人買賣超(張數)"] = "{:,.0f}"
         if "轉折值" in df.columns: 
-            display_cols.append("轉折值")
-            format_dict["轉折值"] = "{:.2f}"
+            display_cols.append("轉折值"); format_dict["轉折值"] = "{:.2f}"
         styled_df = df[display_cols].style.apply(highlight_pivot, axis=1).format(format_dict, na_rep="-").map(color_tw, subset=color_cols)
     else:
         # B/C 策略渲染
@@ -224,7 +223,18 @@ else:
         styled_df = df_display.style.apply(highlight_pivot, axis=1).format({c: "{:.2f}" for c in df_display.columns if c not in ["股價代號", "公司名稱", "產業別", "近20日法人買賣超(張)"]}, na_rep="-").map(color_tech_blue, subset=color_cols)
 
     st.dataframe(styled_df, use_container_width=True)
-    st.markdown('''<div class="disclaimer-box">🛡️ <div class="disclaimer-text"><span class="disclaimer-bold">重要提醒：</span>高亮背景代表「現價 > 轉折值」，技術面上屬於強勢轉折向上區間。</div></div>''', unsafe_allow_html=True)
+
+    # 💡 復原：最初的磨砂玻璃警語
+    st.markdown('''
+        <div class="disclaimer-box">
+            <div class="disclaimer-icon">🛡️</div>
+            <div class="disclaimer-text">
+                <span class="disclaimer-bold">重要免責聲明 (Legal Disclaimer)</span>
+                本系統篩選結果為大數據與量化模型之運算產出，內容僅供投資參考，不構成任何買賣建議或進出場依據。市場投資具有高度風險，使用者應進行獨立評估並做好個人資金與風險控管，本系統對任何投資損失不負法律責任。
+            </div>
+        </div>
+    ''', unsafe_allow_html=True)
+    
     st.download_button("📥 下載 Excel 數據報告", df.to_csv(index=False).encode('utf-8-sig'), file_name=f"Quant_Report_{data_date}.csv")
 
 st.divider(); st.caption("QUANTUM DATA SYSTEM © 2026 | Minimalist Design. Maximum Insight.")
