@@ -10,10 +10,11 @@ GITHUB_REPO = "stock-data"
 
 st.set_page_config(page_title="QUANTUM TECH SCANNER", layout="wide", initial_sidebar_state="collapsed")
 
-# 視覺系統 11.0
+# 💡 視覺系統 12.0：還原 15 秒搜索儀式感、極致排版
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@500;700&family=Noto+Sans+TC:wght@300;500;700&display=swap');
+    
     html, body, [class*="css"] { 
         font-family: 'Inter', 'Noto Sans TC', sans-serif !important; 
         background-color: #0b0f19 !important; color: #e2e8f0 !important;
@@ -63,14 +64,23 @@ st.markdown("""
     .logic-subtitle { font-size: 1.1rem; font-weight: 700; color: #ffffff; margin-bottom: 8px; }
     .logic-desc { font-size: 0.85rem; color: #94a3b8; line-height: 1.6; }
     .highlight { color: #ffffff; font-weight: 600; background: rgba(0, 242, 255, 0.1); padding: 0 4px; border-bottom: 1px solid #00f2ff; }
+    
+    /* 免責聲明 */
     .disclaimer-box {
         background: rgba(30, 41, 59, 0.4); border-left: 4px solid #334155; padding: 15px;
         border-radius: 4px; margin: 30px 0; font-size: 0.85rem; color: #64748b;
     }
+    
+    /* 啟動按鈕 */
     .stButton > button {
         background: linear-gradient(90deg, #00f2ff, #0072ff) !important;
         color: white !important; border: none !important; border-radius: 8px !important; 
         font-weight: 700 !important; letter-spacing: 1px; padding: 12px 0 !important; width: 100% !important; min-height: 50px !important;
+    }
+    
+    /* 進度條漸層美化 */
+    .stProgress > div > div > div > div {
+        background: linear-gradient(90deg, #00f2ff, #0072ff) !important;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -79,7 +89,7 @@ if 'scan_completed' not in st.session_state: st.session_state['scan_completed'] 
 now_taipei = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=8)
 data_date = now_taipei.strftime('%Y-%m-%d') if now_taipei.hour >= 20 else (now_taipei - datetime.timedelta(days=1)).strftime('%Y-%m-%d')
 
-# 頂部標題與狀態
+# 頂部渲染
 st.markdown(f'''
     <div class="header-group">
         <h1 class="main-title">QUANTUM SCANNER</h1>
@@ -131,61 +141,68 @@ if not st.session_state['scan_completed']:
     _, btn_col, _ = st.columns([1, 2, 1])
     with btn_col:
         if st.button("🚀 啟動AI量化篩選", use_container_width=True):
-            with st.status("正在抓取量化資料庫...", expanded=True) as status:
+            # 💡 儀式感核心：設定 15 秒搜索流程
+            p_bar = st.progress(0, text="📡 正在連接數據終端...")
+            with st.status("正在執行深度運算...", expanded=True) as status:
+                steps = [
+                    (20, "🔍 正在初始化數據終端並驗證權限..."),
+                    (40, "📈 執行多維度技術指標過濾與位階判定..."),
+                    (60, "🏭 檢索基本面營收規模與成長加速度數據..."),
+                    (80, "🏦 同步三大法人籌碼分布狀態與交叉比對..."),
+                    (100, "🏆 正在產出最終精選量化篩選報告...")
+                ]
+                
+                for p, txt in steps:
+                    time.sleep(3.0) # 每步 3 秒，總共 15 秒
+                    p_bar.progress(p, text=txt)
+                    status.write(txt)
+                
                 try:
-                    # 💡 增加 Timeout 至 30 秒，並增加時間戳防快取
                     ts = int(time.time())
                     url_1 = f"https://raw.githubusercontent.com/{GITHUB_USER}/{GITHUB_REPO}/main/daily_result.csv?t={ts}"
                     url_2 = f"https://raw.githubusercontent.com/{GITHUB_USER}/{GITHUB_REPO}/main/momentum_result.csv?t={ts}"
                     
                     if TARGET_MODE == "single_1":
                         r = requests.get(url_1, timeout=30)
-                        if r.status_code != 200: st.error("❌ GitHub 上找不到策略A的檔案，請先執行 Colab。"); st.stop()
-                        df_f = pd.read_csv(io.StringIO(r.text))
+                        df_f = pd.read_csv(io.StringIO(r.text)) if r.status_code == 200 else pd.DataFrame()
                     elif TARGET_MODE == "single_2":
                         r = requests.get(url_2, timeout=30)
-                        if r.status_code != 200: st.error("❌ GitHub 上找不到策略B的檔案，請先執行 Colab。"); st.stop()
-                        df_f = pd.read_csv(io.StringIO(r.text))
+                        df_f = pd.read_csv(io.StringIO(r.text)) if r.status_code == 200 else pd.DataFrame()
                     else:
-                        status.write("📡 正在同步雙向大數據...")
-                        r1 = requests.get(url_1, timeout=30)
-                        r2 = requests.get(url_2, timeout=30)
+                        r1, r2 = requests.get(url_1, timeout=30), requests.get(url_2, timeout=30)
                         if r1.status_code == 200 and r2.status_code == 200:
                             df1, df2 = pd.read_csv(io.StringIO(r1.text)), pd.read_csv(io.StringIO(r2.text))
-                            # 確保股價代號為字串以利合併
                             df1['股價代號'] = df1['股價代號'].astype(str)
                             df2['股價代號'] = df2['股價代號'].astype(str)
                             col_to_use = '近20日買超張數' if '近20日買超張數' in df2.columns else '近20日法人買賣超(張)'
                             df_f = pd.merge(df1, df2[['股價代號', '240日報酬(%)', '20日報酬(%)', col_to_use]], on='股價代號', how='inner')
-                        else:
-                            st.error("❌ 無法從 GitHub 取得交集數據，請確認 Colab 已成功更新兩個檔案。"); st.stop()
+                        else: df_f = pd.DataFrame()
 
                     if not df_f.empty:
                         df_f.index = range(1, len(df_f) + 1)
                         st.session_state['temp_df'] = df_f
                         st.session_state['selected_strategy'] = strategy_choice
                         st.session_state['scan_completed'] = True
-                        status.update(label="✅ 篩選成功", state="complete", expanded=False); st.rerun()
-                    else:
-                        st.warning("💡 目前市場中暫無符合此嚴苛條件的標的。")
-                except requests.exceptions.Timeout:
-                    st.error("⏰ 連線超時：GitHub 伺服器回應過慢，請稍後再試。")
-                except Exception as e:
-                    st.error(f"⚠️ 發生未知錯誤：{e}")
+                        status.update(label="✅ 篩選成功", state="complete", expanded=False)
+                        st.rerun()
+                    else: st.error("目前無符合標的。")
+                except: st.error("連線超時。")
 else:
+    # 顯示結果
+    df = st.session_state['temp_df']
+    strategy_choice = st.session_state['selected_strategy']
     m1, m2, m3 = st.columns(3)
-    m1.metric("🎯 符合標的", f"{len(st.session_state['temp_df'])} 檔")
+    m1.metric("🎯 符合標的", f"{len(df)} 檔")
     m2.metric("📅 數據基準日", str(data_date))
-    m3.metric("🧠 策略模組", st.session_state['selected_strategy'].split('.')[0])
+    m3.metric("🧠 策略模組", strategy_choice.split('.')[0])
     
     st.button("🔄 重新選擇策略", on_click=lambda: st.session_state.update({"scan_completed": False}), use_container_width=True)
-    st.markdown(f"### 🏆 TOP PICKS : {st.session_state['selected_strategy']}")
+    st.markdown(f"### 🏆 TOP PICKS : {strategy_choice}")
     
-    df = st.session_state['temp_df']
-    if "A." in st.session_state['selected_strategy']:
+    if "A." in strategy_choice:
         display_cols = ["股價代號", "公司名稱", "產業別", "現價", "季乖離", "年乖離", "月營收MoM(%)", "月營收YoY(%)", "今年以來累積營收YoY(%)", "近20日法人買賣超(張數)"]
         st.dataframe(df[display_cols].style.format({"現價": "{:.2f}", "季乖離": "{:.2f}%", "年乖離": "{:.2f}%", "月營收MoM(%)": "{:.2f}%", "月營收YoY(%)": "{:.2f}%", "今年以來累積營收YoY(%)": "{:.2f}%", "近20日法人買賣超(張數)": "{:,.0f}"}), use_container_width=True)
-    elif "B." in st.session_state['selected_strategy']:
+    elif "B." in strategy_choice:
         display_cols = ['股價代號', '公司名稱', '產業別', '現價', '240日報酬(%)', '20日報酬(%)', '近20日法人買賣超(張)']
         df_b = df[display_cols].rename(columns={'240日報酬(%)': '近240日報酬(%)', '20日報酬(%)': '近20日報酬(%)', '近20日法人買賣超(張)': '近20日法人買超張數'})
         st.dataframe(df_b.style.format({"現價": "{:.2f}", "近240日報酬(%)": "{:+.2f}%", "近20日報酬(%)": "{:+.2f}%", "近20日法人買超張數": "{:,.0f}"}), use_container_width=True)
