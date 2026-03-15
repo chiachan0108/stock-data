@@ -10,7 +10,7 @@ GITHUB_REPO = "stock-data"
 
 st.set_page_config(page_title="QUANTUM TECH SCANNER", layout="wide", initial_sidebar_state="collapsed")
 
-# 💡 視覺系統 18.0：轉折訊號發光增強版
+# 💡 視覺系統 18.0 (穩定修正版)：修正 KeyError 與欄位對齊
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&family=Noto+Sans+TC:wght@100;300;400;500;700&display=swap');
@@ -73,11 +73,10 @@ def color_tech_blue(val):
     if pd.isna(val) or not isinstance(val, (int, float)): return ''
     return 'color: #00f2ff; font-weight: 600;'
 
-# 💡 核心優化：轉折向上高亮邏輯 (行級別渲染)
+# 💡 核心優化：轉折向上高亮邏輯
 def highlight_pivot(row):
     style = [''] * len(row)
-    # 如果 現價 > 轉折值，則整行給予一個淡淡的電光藍發光背景
-    if "轉折值" in row.index and row["現價"] > row["轉折值"]:
+    if "轉折值" in row.index and row["現價"] > row["轉折值"] and row["轉折值"] > 0:
         style = ['background-color: rgba(0, 242, 255, 0.08); border-bottom: 1px solid rgba(0, 242, 255, 0.2);'] * len(row)
     return style
 
@@ -103,14 +102,13 @@ if not st.session_state['scan_completed']:
     strategy_choice = st.selectbox("量化策略模組", strategy_options, label_visibility="collapsed")
     
     st.markdown("<div class='section-label'>SYSTEM ARCHITECTURE 系統核心邏輯</div>", unsafe_allow_html=True)
-    # (此處保留原有 logic_html 邏輯，代碼略...)
-    st.markdown("🔍 正在初始化數據終端並驗證權限...", unsafe_allow_html=True)
+    # (此處省略部分內容以節省空間)
 
     _, btn_col, _ = st.columns([1, 2, 1])
     with btn_col:
         if st.button("🚀 啟動AI量化篩選", use_container_width=True):
             with st.status("正在執行深度運算...", expanded=True) as status:
-                time.sleep(2) # 保持搜尋質感
+                time.sleep(1.5)
                 try:
                     ts = int(time.time())
                     url_1 = f"https://raw.githubusercontent.com/{GITHUB_USER}/{GITHUB_REPO}/main/daily_result.csv?t={ts}"
@@ -132,7 +130,7 @@ if not st.session_state['scan_completed']:
                         st.session_state['selected_strategy'] = strategy_choice
                         st.session_state['scan_completed'] = True
                         st.rerun()
-                except Exception as e: st.error(f"⚠️ 連線異常：{str(e)}")
+                except Exception as e: st.error(f"⚠️ 連線或資料解析異常，請確保 GitHub CSV 檔案包含『轉折值』欄位：{str(e)}")
 else:
     df = st.session_state['temp_df']
     strategy_choice = st.session_state['selected_strategy']
@@ -145,31 +143,42 @@ else:
     st.button("🔄 重新選擇策略", on_click=lambda: st.session_state.update({"scan_completed": False}), use_container_width=True)
     st.markdown(f"### 🏆 TOP PICKS : {strategy_choice}")
     
-    # 💡 渲染與標記邏輯
+    # 💡 修正關鍵點：確保 A 策略欄位名稱完全正確
     if "A." in strategy_choice:
-        display_cols = ["股價代號", "公司名稱", "產業別", "現價", "季乖離", "年乖離", "月營收MoM(%)", "月營收YoY(%)", "今年以來累積營收YoY(%)", "近20日法人買賣超(張數)", "轉折值"]
-        color_cols = ["季乖離", "年乖離", "月營收MoM(%)", "月營收YoY(%)", "今年以來累積營超YoY(%)", "近20日法人買賣超(張數)"]
-        format_dict = {c: "{:.2f}" for c in ["現價", "季乖離", "年乖離", "月營收MoM(%)", "月營收YoY(%)", "今年以來累積營收YoY(%)", "轉折值"]}
+        # 修正 typo: 今年以來累積營「超」 -> 「收」
+        display_cols = ["股價代號", "公司名稱", "產業別", "現價", "季乖離", "年乖離", "月營收MoM(%)", "月營收YoY(%)", "今年以來累積營收YoY(%)", "近20日法人買賣超(張數)"]
+        color_cols = ["季乖離", "年乖離", "月營收MoM(%)", "月營收YoY(%)", "今年以來累積營收YoY(%)", "近20日法人買賣超(張數)"]
+        
+        format_dict = {c: "{:.2f}" for c in ["現價", "季乖離", "年乖離", "月營收MoM(%)", "月營收YoY(%)", "今年以來累積營收YoY(%)"]}
         format_dict["近20日法人買賣超(張數)"] = "{:,.0f}"
         
-        # 💡 先應用行高亮 (現價 > 轉折值)，再應用文字著色
+        if "轉折值" in df.columns: 
+            display_cols.append("轉折值")
+            format_dict["轉折值"] = "{:.2f}"
+            
         styled_df = df[display_cols].style.apply(highlight_pivot, axis=1)\
                     .format(format_dict, na_rep="-")\
                     .map(color_tw, subset=color_cols)
     else:
         # 策略 B 或 C
         if "B." in strategy_choice:
-            display_cols = ['股價代號', '公司名稱', '產業別', '現價', '240日報酬(%)', '20日報酬(%)', '近20日法人買賣超(張)', '轉折值']
-            df_display = df[display_cols].rename(columns={'近20日法人買賣超(張)': '近20日法人買超(張)'})
-            color_cols = ["240日報酬(%)", "20日報酬(%)", "近20日法人買超(張)", "轉折值"]
+            display_cols = ['股價代號', '公司名稱', '產業別', '現價', '240日報酬(%)', '20日報酬(%)', '近20日法人買賣超(張)']
+            # 如果 CSV 的欄位名稱是這個，請確認
+            df_display = df[display_cols].copy()
+            color_cols = ["240日報酬(%)", "20日報酬(%)"]
         else: # 策略 C
             chip_col = [c for c in df.columns if '法人' in c or '買超' in c][0]
-            display_cols = ['股價代號', '公司名稱', '產業別', '現價', '今年以來累積營收YoY(%)', '240日報酬(%)', '20日報酬(%)', chip_col, '轉折值']
-            df_display = df[display_cols]
-            color_cols = ['今年以來累積營收YoY(%)', '240日報酬(%)', '20日報酬(%)', chip_col, '轉折值']
+            display_cols = ['股價代號', '公司名稱', '產業別', '現價', '今年以來累積營收YoY(%)', '240日報酬(%)', '20日報酬(%)', chip_col]
+            df_display = df[display_cols].copy()
+            color_cols = ['今年以來累積營收YoY(%)', '240日報酬(%)', '20日報酬(%)', chip_col]
+            
+        if "轉折值" in df.columns:
+            display_cols.append("轉折值")
+            df_display = df[display_cols].copy()
+            color_cols.append("轉折值")
             
         styled_df = df_display.style.apply(highlight_pivot, axis=1)\
-                    .format({c: "{:.2f}" for c in df_display.columns if "名稱" not in c and "代號" not in c and "產業" not in c}, na_rep="-")\
+                    .format({c: "{:.2f}" for c in df_display.columns if c not in ["股價代號", "公司名稱", "產業別", "近20日法人買賣超(張)", "近20日法人買超(張)"]}, na_rep="-")\
                     .map(color_tech_blue, subset=color_cols)
 
     st.dataframe(styled_df, use_container_width=True)
