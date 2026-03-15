@@ -8,17 +8,29 @@ import datetime, io, time, requests
 GITHUB_USER = "chiachan0108"
 GITHUB_REPO = "stock-data"
 
-st.set_page_config(page_title="QUANTUM TECH SCANNER", layout="wide", initial_sidebar_state="collapsed")
+st.set_page_config(page_title="QUANTUM TECH SCANNER | 台股智能量化篩選", layout="wide", initial_sidebar_state="collapsed")
 
-# 視覺優化 CSS
+# 💡 全新高質感 CSS 視覺系統
 st.markdown("""
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600;700&family=Noto+Sans+TC:wght@300;400;500;700&display=swap');
+    
     html, body, [class*="css"] { 
         font-family: 'Inter', 'Noto Sans TC', sans-serif; 
-        background: linear-gradient(135deg, #090B10 0%, #111520 100%);
+        background: linear-gradient(135deg, #0b0f19 0%, #1a202c 100%);
         color: #e2e8f0;
     }
+    
+    /* 標題區塊佈局 */
+    .title-wrapper {
+        display: flex;
+        align-items: baseline;
+        gap: 16px;
+        flex-wrap: wrap;
+        margin-bottom: 5px;
+        margin-top: 10px;
+    }
+    
     .main-title { 
         font-family: 'JetBrains Mono', monospace; 
         font-weight: 700; 
@@ -26,45 +38,137 @@ st.markdown("""
         background: linear-gradient(90deg, #00f2ff, #0072ff);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
-        font-size: 3.5rem; 
-        margin-bottom: 0px; 
-        text-shadow: 0px 4px 20px rgba(0, 242, 255, 0.2);
+        font-size: 3.8rem; 
+        margin: 0; 
+        text-shadow: 0px 4px 30px rgba(0, 242, 255, 0.25);
     }
+    
+    .sub-title {
+        font-family: 'Noto Sans TC', sans-serif;
+        font-weight: 500;
+        font-size: 1.4rem;
+        color: #94a3b8;
+        letter-spacing: 2px;
+        border-left: 2px solid rgba(0, 242, 255, 0.4);
+        padding-left: 16px;
+    }
+
+    /* 圓角徽章風格公告 */
     .update-note { 
-        font-family: 'JetBrains Mono', monospace;
-        font-size: 0.85rem; 
-        color: #94a3b8; 
-        background: rgba(15, 23, 42, 0.6); 
-        padding: 6px 14px; 
-        border-radius: 4px; 
-        border-left: 3px solid #00f2ff;
-        display: inline-block; 
-        margin-bottom: 35px;
-        margin-top: 10px;
+        font-family: 'Noto Sans TC', sans-serif;
+        font-size: 0.9rem; 
+        font-weight: 400;
+        color: #cbd5e1; 
+        background: rgba(30, 41, 59, 0.6); 
+        padding: 8px 20px; 
+        border-radius: 50px; 
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        display: inline-flex; 
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 40px;
+        margin-top: 15px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        letter-spacing: 0.5px;
     }
-    .logic-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; margin-bottom: 40px; }
+    
+    .divider-line {
+        color: rgba(255,255,255,0.15);
+        margin: 0 4px;
+    }
+
+    /* 卡片網格系統 */
+    .logic-grid { 
+        display: grid; 
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); 
+        gap: 20px; 
+        margin-bottom: 40px; 
+    }
+
+    /* 玻璃擬態卡片設計 */
     .logic-item { 
-        background: rgba(30, 41, 59, 0.4); 
+        background: rgba(30, 41, 59, 0.35); 
         border: 1px solid rgba(148, 163, 184, 0.1); 
-        border-radius: 12px; 
-        padding: 24px; 
-        backdrop-filter: blur(10px);
-        transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+        border-radius: 16px; 
+        padding: 26px; 
+        backdrop-filter: blur(12px);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
-    .logic-item:hover { transform: translateY(-5px); box-shadow: 0 10px 30px -10px rgba(0, 242, 255, 0.15); border-color: rgba(0, 242, 255, 0.4); }
-    .logic-index { font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: #00f2ff; font-weight: 600; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
-    .logic-subtitle { font-size: 1.2rem; font-weight: 700; color: #f8fafc; margin-bottom: 12px; }
-    .logic-desc { font-size: 0.95rem; color: #cbd5e1; line-height: 1.6; }
-    .highlight { color: #ffffff; font-weight: 600; background: rgba(0, 242, 255, 0.15); padding: 2px 6px; border-radius: 4px; border-bottom: 1px solid #00f2ff; }
-    .stProgress > div > div > div > div { background: linear-gradient(90deg, #00f2ff, #0072ff); }
-    .stButton > button { border-radius: 8px; font-weight: 600; letter-spacing: 0.5px; }
+    .logic-item:hover { 
+        transform: translateY(-6px); 
+        box-shadow: 0 12px 40px -10px rgba(0, 242, 255, 0.15); 
+        border-color: rgba(0, 242, 255, 0.4); 
+        background: rgba(30, 41, 59, 0.5);
+    }
+    
+    .logic-index { 
+        font-family: 'JetBrains Mono', monospace; 
+        font-size: 0.85rem; 
+        color: #00f2ff; 
+        font-weight: 600; 
+        margin-bottom: 10px; 
+        text-transform: uppercase; 
+        letter-spacing: 1px; 
+    }
+    .logic-subtitle { 
+        font-size: 1.25rem; 
+        font-weight: 700; 
+        color: #f8fafc; 
+        margin-bottom: 12px; 
+        letter-spacing: 0.5px;
+    }
+    .logic-desc { 
+        font-size: 0.95rem; 
+        color: #94a3b8; 
+        line-height: 1.65; 
+    }
+
+    /* 醒目高亮 */
+    .highlight { 
+        color: #ffffff; 
+        font-weight: 600; 
+        background: rgba(0, 242, 255, 0.12); 
+        padding: 2px 8px; 
+        border-radius: 6px; 
+        border-bottom: 1px solid #00f2ff; 
+    }
+
+    /* 元件客製化 */
+    .stProgress > div > div > div > div { 
+        background: linear-gradient(90deg, #00f2ff, #0072ff); 
+        border-radius: 10px;
+    }
+    .stButton > button { 
+        border-radius: 10px; 
+        font-weight: 600; 
+        letter-spacing: 0.5px; 
+        padding: 10px 24px;
+        transition: all 0.3s ease;
+    }
     </style>
 """, unsafe_allow_html=True)
 
+# --- 核心狀態與動態日期計算 ---
 if 'scan_completed' not in st.session_state: st.session_state['scan_completed'] = False
 
-st.markdown('<h1 class="main-title">QUANTUM SCANNER</h1>', unsafe_allow_html=True)
-st.markdown('<div class="update-note">SYS.STATUS: ONLINE | DATA_SYNC: DAILY 20:00 CST</div>', unsafe_allow_html=True)
+now_taipei = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=8)
+data_date = now_taipei.strftime('%Y-%m-%d') if now_taipei.hour >= 20 else (now_taipei - datetime.timedelta(days=1)).strftime('%Y-%m-%d')
+
+# --- 頂部標題與動態公告 ---
+st.markdown('''
+    <div class="title-wrapper">
+        <h1 class="main-title">QUANTUM SCANNER</h1>
+        <span class="sub-title">台股智能量化篩選</span>
+    </div>
+''', unsafe_allow_html=True)
+
+st.markdown(f'''
+    <div class="update-note">
+        <span>🔄 每日 20:00 更新資料庫</span>
+        <span class="divider-line">|</span>
+        <span>📅 最後更新日：<span style="color: #00f2ff; font-weight: 600;">{data_date}</span></span>
+    </div>
+''', unsafe_allow_html=True)
 
 # --- 策略選擇器 ---
 strategy_options = [
@@ -72,9 +176,10 @@ strategy_options = [
     "B. 股價動能型 (技術面優先)",
     "C. 營收、股價動能雙吻合"
 ]
-st.markdown("### ⚙️ STRATEGY CONFIGURATION")
 
-# 下拉選單在掃描完成後會鎖定
+# 💡 優雅的雙語小標題
+st.markdown("### ⚙️ STRATEGY CONFIGURATION <span style='font-size: 1.15rem; color: #64748b; font-weight: 500; letter-spacing: 1px; margin-left: 12px;'>策略選取</span>", unsafe_allow_html=True)
+
 strategy_choice = st.selectbox(
     "請選擇量化策略模組", 
     strategy_options, 
@@ -108,7 +213,6 @@ elif strategy_choice == "B. 股價動能型 (技術面優先)":
     """
 else:
     TARGET_MODE = "dual_intersection"
-    # 💡 依照您的需求更新 C 選項 04 的文字敘述
     logic_html = """
     <div class="logic-grid">
         <div class="logic-item"><div class="logic-index">01 / INTERSECTION</div><div class="logic-subtitle">雙引擎交集</div><div class="logic-desc">系統自動比對，抓出同時具備 <span class="highlight">營收創高動能</span> 與 <span class="highlight">技術面強勢</span> 的標的。</div></div>
@@ -121,7 +225,7 @@ else:
 st.markdown("---")
 
 if not st.session_state['scan_completed']:
-    st.markdown("### 🧠 SYSTEM ARCHITECTURE")
+    st.markdown("### 🧠 SYSTEM ARCHITECTURE <span style='font-size: 1.15rem; color: #64748b; font-weight: 500; letter-spacing: 1px; margin-left: 12px;'>系統核心邏輯</span>", unsafe_allow_html=True)
     st.markdown(logic_html, unsafe_allow_html=True)
     _, btn_col, _ = st.columns([1, 2, 1])
     with btn_col:
@@ -155,7 +259,6 @@ if not st.session_state['scan_completed']:
                         else: df_final = pd.DataFrame()
 
                     if not df_final.empty:
-                        # 索引從 1 開始
                         df_final.index = range(1, len(df_final) + 1)
                         st.session_state['temp_df'] = df_final
                         st.session_state['scan_completed'] = True
@@ -165,8 +268,6 @@ if not st.session_state['scan_completed']:
                 except Exception: st.error("連線超時，請稍後再試。")
 else:
     df = st.session_state['temp_df']
-    now_taipei = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=8)
-    update_date = now_taipei.strftime('%Y-%m-%d')
     
     m1, m2, m3 = st.columns(3)
     if "C." in strategy_choice: sample_text = "極致交集比對"
@@ -175,7 +276,7 @@ else:
     
     m1.metric("📌 掃描樣本池", sample_text)
     m2.metric("🎯 符合門檻標的", f"{len(df)} 檔")
-    m3.metric("🕒 數據基準日", str(update_date))
+    m3.metric("🕒 數據基準日", str(data_date))
     
     st.markdown("<br>", unsafe_allow_html=True)
     st.button("🔄 重新選擇策略 (返回主選單)", on_click=lambda: st.session_state.update({"scan_completed": False}), type="primary", use_container_width=True)
@@ -205,6 +306,6 @@ else:
     if not df.empty:
         output = io.BytesIO()
         with pd.ExcelWriter(output, engine='xlsxwriter') as writer: df.to_excel(writer, index=False)
-        st.download_button("📥 下載完整數據報告 (Excel)", output.getvalue(), file_name=f"Quant_Report_{update_date}.xlsx", type="primary")
+        st.download_button("📥 下載完整數據報告 (Excel)", output.getvalue(), file_name=f"Quant_Report_{data_date}.xlsx", type="primary")
 
 st.divider(); st.caption("QUANTUM DATA SYSTEM © 2026 | Minimalist Design. Maximum Insight.")
