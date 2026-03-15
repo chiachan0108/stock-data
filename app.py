@@ -10,7 +10,7 @@ GITHUB_REPO = "stock-data"
 
 st.set_page_config(page_title="QUANTUM TECH SCANNER", layout="wide", initial_sidebar_state="collapsed")
 
-# 💡 視覺系統 12.0：還原 15 秒搜索儀式感、極致排版
+# 💡 視覺系統 13.0：終極修復版
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@500;700&family=Noto+Sans+TC:wght@300;500;700&display=swap');
@@ -19,13 +19,16 @@ st.markdown("""
         font-family: 'Inter', 'Noto Sans TC', sans-serif !important; 
         background-color: #0b0f19 !important; color: #e2e8f0 !important;
     }
-    .header-group { margin-top: -30px; margin-bottom: 5px; }
+
+    /* 頂部區域緊湊化 */
+    .header-group { margin-top: -45px; margin-bottom: 10px; }
     .main-title { 
         font-family: 'JetBrains Mono', monospace !important; font-weight: 700; letter-spacing: -2px; 
         background: linear-gradient(90deg, #00f2ff, #0072ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-        font-size: clamp(2.5rem, 6vw, 3.8rem); line-height: 1.2; margin: 0;
+        font-size: clamp(2.5rem, 6vw, 3.8rem); line-height: 1.1; margin: 0;
     }
-    .sub-title { font-size: 1.3rem; color: #94a3b8; letter-spacing: 3px; margin-bottom: 15px; font-weight: 300; }
+    .sub-title { font-size: 1.2rem; color: #94a3b8; letter-spacing: 3px; margin-bottom: 15px; font-weight: 300; }
+    
     .status-pill {
         display: inline-flex; align-items: center; background: rgba(0, 242, 255, 0.05);
         border: 1px solid rgba(0, 242, 255, 0.2); padding: 5px 15px; border-radius: 50px;
@@ -37,12 +40,16 @@ st.markdown("""
         animation: pulse 2s infinite;
     }
     @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
+
     .section-label {
         font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: #00f2ff;
-        letter-spacing: 2px; margin-top: 15px; margin-bottom: 8px; font-weight: 600; text-transform: uppercase;
+        letter-spacing: 2px; margin-top: 10px; margin-bottom: 8px; font-weight: 600; text-transform: uppercase;
     }
+
+    /* 下拉選單文字垂直置中與高度鎖定 */
     div[data-testid="stSelectbox"] { margin-top: -5px !important; margin-bottom: 20px !important; }
     div[data-testid="stSelectbox"] label { display: none !important; }
+    
     .stSelectbox [data-baseweb="select"] {
         background-color: #161b2a !important; border: 1px solid rgba(0, 242, 255, 0.3) !important;
         border-radius: 12px !important; height: 52px !important;
@@ -50,9 +57,13 @@ st.markdown("""
     .stSelectbox div[data-baseweb="select"] > div {
         font-size: 1rem !important; padding-left: 15px !important; height: 50px !important;
         display: flex !important; align-items: center !important; line-height: 1 !important;
+        overflow: visible !important;
     }
+
+    /* 4 欄強制定版 (桌面端) */
     .logic-grid { display: grid; gap: 15px; grid-template-columns: repeat(1, 1fr); margin-bottom: 30px; }
     @media (min-width: 1024px) { .logic-grid { grid-template-columns: repeat(4, 1fr) !important; } }
+
     .logic-item { 
         background: #161b22; border: 1px solid rgba(148, 163, 184, 0.15); 
         border-top: 3px solid #00f2ff; border-radius: 12px; padding: 20px; transition: 0.3s;
@@ -64,24 +75,14 @@ st.markdown("""
     .logic-subtitle { font-size: 1.1rem; font-weight: 700; color: #ffffff; margin-bottom: 8px; }
     .logic-desc { font-size: 0.85rem; color: #94a3b8; line-height: 1.6; }
     .highlight { color: #ffffff; font-weight: 600; background: rgba(0, 242, 255, 0.1); padding: 0 4px; border-bottom: 1px solid #00f2ff; }
-    
-    /* 免責聲明 */
-    .disclaimer-box {
-        background: rgba(30, 41, 59, 0.4); border-left: 4px solid #334155; padding: 15px;
-        border-radius: 4px; margin: 30px 0; font-size: 0.85rem; color: #64748b;
-    }
-    
-    /* 啟動按鈕 */
+
     .stButton > button {
         background: linear-gradient(90deg, #00f2ff, #0072ff) !important;
         color: white !important; border: none !important; border-radius: 8px !important; 
         font-weight: 700 !important; letter-spacing: 1px; padding: 12px 0 !important; width: 100% !important; min-height: 50px !important;
     }
     
-    /* 進度條漸層美化 */
-    .stProgress > div > div > div > div {
-        background: linear-gradient(90deg, #00f2ff, #0072ff) !important;
-    }
+    .stProgress > div > div > div > div { background: linear-gradient(90deg, #00f2ff, #0072ff) !important; }
     </style>
 """, unsafe_allow_html=True)
 
@@ -141,11 +142,10 @@ if not st.session_state['scan_completed']:
     _, btn_col, _ = st.columns([1, 2, 1])
     with btn_col:
         if st.button("🚀 啟動AI量化篩選", use_container_width=True):
-            # 💡 儀式感核心：設定 15 秒搜索流程
             p_bar = st.progress(0, text="📡 正在連接數據終端...")
             with st.status("正在執行深度運算...", expanded=True) as status:
                 steps = [
-                    (20, "🔍 正在初始化數據終端並驗證權限..."),
+                    (20, "🔍 正在驗證數據終端存取權限..."),
                     (40, "📈 執行多維度技術指標過濾與位階判定..."),
                     (60, "🏭 檢索基本面營收規模與成長加速度數據..."),
                     (80, "🏦 同步三大法人籌碼分布狀態與交叉比對..."),
@@ -153,7 +153,7 @@ if not st.session_state['scan_completed']:
                 ]
                 
                 for p, txt in steps:
-                    time.sleep(3.0) # 每步 3 秒，總共 15 秒
+                    time.sleep(2.5) # 還原儀式感 (總計約12.5秒)
                     p_bar.progress(p, text=txt)
                     status.write(txt)
                 
@@ -162,21 +162,25 @@ if not st.session_state['scan_completed']:
                     url_1 = f"https://raw.githubusercontent.com/{GITHUB_USER}/{GITHUB_REPO}/main/daily_result.csv?t={ts}"
                     url_2 = f"https://raw.githubusercontent.com/{GITHUB_USER}/{GITHUB_REPO}/main/momentum_result.csv?t={ts}"
                     
+                    df_f = pd.DataFrame()
                     if TARGET_MODE == "single_1":
-                        r = requests.get(url_1, timeout=30)
-                        df_f = pd.read_csv(io.StringIO(r.text)) if r.status_code == 200 else pd.DataFrame()
+                        r = requests.get(url_1, timeout=20)
+                        if r.status_code == 200: df_f = pd.read_csv(io.StringIO(r.text))
+                        else: st.error(f"❌ 找不到策略A檔案 (HTTP {r.status_code})，請檢查 Colab 是否執行成功。"); st.stop()
                     elif TARGET_MODE == "single_2":
-                        r = requests.get(url_2, timeout=30)
-                        df_f = pd.read_csv(io.StringIO(r.text)) if r.status_code == 200 else pd.DataFrame()
+                        r = requests.get(url_2, timeout=20)
+                        if r.status_code == 200: df_f = pd.read_csv(io.StringIO(r.text))
+                        else: st.error(f"❌ 找不到策略B檔案 (HTTP {r.status_code})，請檢查 Colab 是否執行成功。"); st.stop()
                     else:
-                        r1, r2 = requests.get(url_1, timeout=30), requests.get(url_2, timeout=30)
+                        r1, r2 = requests.get(url_1, timeout=20), requests.get(url_2, timeout=20)
                         if r1.status_code == 200 and r2.status_code == 200:
                             df1, df2 = pd.read_csv(io.StringIO(r1.text)), pd.read_csv(io.StringIO(r2.text))
                             df1['股價代號'] = df1['股價代號'].astype(str)
                             df2['股價代號'] = df2['股價代號'].astype(str)
-                            col_to_use = '近20日買超張數' if '近20日買超張數' in df2.columns else '近20日法人買賣超(張)'
-                            df_f = pd.merge(df1, df2[['股價代號', '240日報酬(%)', '20日報酬(%)', col_to_use]], on='股價代號', how='inner')
-                        else: df_f = pd.DataFrame()
+                            # 自動匹配法人欄位名稱
+                            chip_col = [c for c in df2.columns if '法人' in c or '買超' in c][0]
+                            df_f = pd.merge(df1, df2[['股價代號', '240日報酬(%)', '20日報酬(%)', chip_col]], on='股價代號', how='inner')
+                        else: st.error("❌ 策略C所需的資料不全，請確保策略A與B的 Colab 任務皆已完成。"); st.stop()
 
                     if not df_f.empty:
                         df_f.index = range(1, len(df_f) + 1)
@@ -185,8 +189,9 @@ if not st.session_state['scan_completed']:
                         st.session_state['scan_completed'] = True
                         status.update(label="✅ 篩選成功", state="complete", expanded=False)
                         st.rerun()
-                    else: st.error("目前無符合標的。")
-                except: st.error("連線超時。")
+                    else: st.warning("💡 目前無符合標的。"); st.stop()
+                except Exception as e:
+                    st.error(f"⚠️ 連線或運算發生異常：{str(e)}")
 else:
     # 顯示結果
     df = st.session_state['temp_df']
@@ -199,6 +204,7 @@ else:
     st.button("🔄 重新選擇策略", on_click=lambda: st.session_state.update({"scan_completed": False}), use_container_width=True)
     st.markdown(f"### 🏆 TOP PICKS : {strategy_choice}")
     
+    # 渲染表格
     if "A." in strategy_choice:
         display_cols = ["股價代號", "公司名稱", "產業別", "現價", "季乖離", "年乖離", "月營收MoM(%)", "月營收YoY(%)", "今年以來累積營收YoY(%)", "近20日法人買賣超(張數)"]
         st.dataframe(df[display_cols].style.format({"現價": "{:.2f}", "季乖離": "{:.2f}%", "年乖離": "{:.2f}%", "月營收MoM(%)": "{:.2f}%", "月營收YoY(%)": "{:.2f}%", "今年以來累積營收YoY(%)": "{:.2f}%", "近20日法人買賣超(張數)": "{:,.0f}"}), use_container_width=True)
@@ -207,8 +213,10 @@ else:
         df_b = df[display_cols].rename(columns={'240日報酬(%)': '近240日報酬(%)', '20日報酬(%)': '近20日報酬(%)', '近20日法人買賣超(張)': '近20日法人買超張數'})
         st.dataframe(df_b.style.format({"現價": "{:.2f}", "近240日報酬(%)": "{:+.2f}%", "近20日報酬(%)": "{:+.2f}%", "近20日法人買超張數": "{:,.0f}"}), use_container_width=True)
     else:
-        display_cols = ['股價代號', '公司名稱', '產業別', '現價', '今年以來累積營收YoY(%)', '240日報酬(%)', '20日報酬(%)', '近20日法人買賣超(張)']
-        st.dataframe(df[display_cols].style.format({"現價": "{:.2f}", "今年以來累積營收YoY(%)": "{:.2f}%", "240日報酬(%)": "{:+.2f}%", "20日報酬(%)": "{:+.2f}%", "近20日法人買賣超(張)": "{:,.0f}"}), use_container_width=True)
+        # 策略 C 欄位顯示
+        chip_col = [c for c in df.columns if '法人' in c or '買超' in c][0]
+        display_cols = ['股價代號', '公司名稱', '產業別', '現價', '今年以來累積營收YoY(%)', '240日報酬(%)', '20日報酬(%)', chip_col]
+        st.dataframe(df[display_cols].style.format({"現價": "{:.2f}", "今年以來累積營收YoY(%)": "{:.2f}%", "240日報酬(%)": "{:+.2f}%", "20日報酬(%)": "{:+.2f}%", chip_col: "{:,.0f}"}), use_container_width=True)
 
     st.markdown('''<div class="disclaimer-box"><b>💡 免責聲明：</b>篩選結果為大數據量化得出，僅供參考不作為進出場依據，投資有風險請做好自身資金控管。</div>''', unsafe_allow_html=True)
     output = io.BytesIO()
