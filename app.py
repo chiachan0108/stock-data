@@ -10,16 +10,14 @@ GITHUB_REPO = "stock-data"
 
 st.set_page_config(page_title="QUANTUM TECH SCANNER", layout="wide", initial_sidebar_state="collapsed")
 
-# 💡 視覺系統 11.0：全面 1000 張門檻、無縫對接、4欄定版
+# 視覺系統 11.0
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@500;700&family=Noto+Sans+TC:wght@300;500;700&display=swap');
-    
     html, body, [class*="css"] { 
         font-family: 'Inter', 'Noto Sans TC', sans-serif !important; 
         background-color: #0b0f19 !important; color: #e2e8f0 !important;
     }
-
     .header-group { margin-top: -30px; margin-bottom: 5px; }
     .main-title { 
         font-family: 'JetBrains Mono', monospace !important; font-weight: 700; letter-spacing: -2px; 
@@ -27,7 +25,6 @@ st.markdown("""
         font-size: clamp(2.5rem, 6vw, 3.8rem); line-height: 1.2; margin: 0;
     }
     .sub-title { font-size: 1.3rem; color: #94a3b8; letter-spacing: 3px; margin-bottom: 15px; font-weight: 300; }
-    
     .status-pill {
         display: inline-flex; align-items: center; background: rgba(0, 242, 255, 0.05);
         border: 1px solid rgba(0, 242, 255, 0.2); padding: 5px 15px; border-radius: 50px;
@@ -39,29 +36,22 @@ st.markdown("""
         animation: pulse 2s infinite;
     }
     @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
-
     .section-label {
         font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: #00f2ff;
         letter-spacing: 2px; margin-top: 15px; margin-bottom: 8px; font-weight: 600; text-transform: uppercase;
     }
-
     div[data-testid="stSelectbox"] { margin-top: -5px !important; margin-bottom: 20px !important; }
     div[data-testid="stSelectbox"] label { display: none !important; }
-    
     .stSelectbox [data-baseweb="select"] {
         background-color: #161b2a !important; border: 1px solid rgba(0, 242, 255, 0.3) !important;
         border-radius: 12px !important; height: 52px !important;
     }
-    
     .stSelectbox div[data-baseweb="select"] > div {
         font-size: 1rem !important; padding-left: 15px !important; height: 50px !important;
         display: flex !important; align-items: center !important; line-height: 1 !important;
     }
-
-    /* 4 欄強制定版 */
     .logic-grid { display: grid; gap: 15px; grid-template-columns: repeat(1, 1fr); margin-bottom: 30px; }
     @media (min-width: 1024px) { .logic-grid { grid-template-columns: repeat(4, 1fr) !important; } }
-
     .logic-item { 
         background: #161b22; border: 1px solid rgba(148, 163, 184, 0.15); 
         border-top: 3px solid #00f2ff; border-radius: 12px; padding: 20px; transition: 0.3s;
@@ -73,12 +63,10 @@ st.markdown("""
     .logic-subtitle { font-size: 1.1rem; font-weight: 700; color: #ffffff; margin-bottom: 8px; }
     .logic-desc { font-size: 0.85rem; color: #94a3b8; line-height: 1.6; }
     .highlight { color: #ffffff; font-weight: 600; background: rgba(0, 242, 255, 0.1); padding: 0 4px; border-bottom: 1px solid #00f2ff; }
-
     .disclaimer-box {
         background: rgba(30, 41, 59, 0.4); border-left: 4px solid #334155; padding: 15px;
         border-radius: 4px; margin: 30px 0; font-size: 0.85rem; color: #64748b;
     }
-
     .stButton > button {
         background: linear-gradient(90deg, #00f2ff, #0072ff) !important;
         color: white !important; border: none !important; border-radius: 8px !important; 
@@ -91,7 +79,7 @@ if 'scan_completed' not in st.session_state: st.session_state['scan_completed'] 
 now_taipei = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=8)
 data_date = now_taipei.strftime('%Y-%m-%d') if now_taipei.hour >= 20 else (now_taipei - datetime.timedelta(days=1)).strftime('%Y-%m-%d')
 
-# 頂部整合渲染
+# 頂部標題與狀態
 st.markdown(f'''
     <div class="header-group">
         <h1 class="main-title">QUANTUM SCANNER</h1>
@@ -107,13 +95,11 @@ st.markdown(f'''
 if not st.session_state['scan_completed']:
     strategy_options = ["A. 營收動能型 (基本面優先)", "B. 股價動能型 (技術面優先)", "C. 營收、股價動能雙吻合"]
     strategy_choice = st.selectbox("量化策略模組", strategy_options, label_visibility="collapsed")
-    
     st.markdown("<div class='section-label'>System Architecture 系統核心邏輯</div>", unsafe_allow_html=True)
 
     if "A." in strategy_choice:
         TARGET_MODE = "single_1"
-        logic_html = """
-        <div class="logic-grid">
+        logic_html = """<div class="logic-grid">
             <div class="logic-item"><div class="logic-header"><span class="logic-icon">🎯</span><span class="logic-index">01/SCOPE</span></div><div class="logic-subtitle">選股範圍</div><div class="logic-desc">鎖定台灣上市櫃<span class="highlight">電子產業</span>標的。</div></div>
             <div class="logic-item"><div class="logic-header"><span class="logic-icon">🌊</span><span class="logic-index">02/LIQUIDITY</span></div><div class="logic-subtitle">流動性門檻</div><div class="logic-desc">近20日平均成交量需大於 <span class="highlight">1,000張</span>。</div></div>
             <div class="logic-item"><div class="logic-header"><span class="logic-icon">⚖️</span><span class="logic-index">03/LEVEL</span></div><div class="logic-subtitle">技術位階</div><div class="logic-desc">股價需穩健站於長線生命線 <span class="highlight">MA240</span> 之上。</div></div>
@@ -125,9 +111,7 @@ if not st.session_state['scan_completed']:
         </div>"""
     elif "B." in strategy_choice:
         TARGET_MODE = "single_2"
-        # 💡 已將說明同步調整為 1,000 張
-        logic_html = """
-        <div class="logic-grid">
+        logic_html = """<div class="logic-grid">
             <div class="logic-item"><div class="logic-header"><span class="logic-icon">🎯</span><span class="logic-index">01/SCOPE</span></div><div class="logic-subtitle">選股範圍</div><div class="logic-desc">全體上市櫃，嚴格排除 <span class="highlight">ETF、權證</span> 等非普通股。</div></div>
             <div class="logic-item"><div class="logic-header"><span class="logic-icon">🌊</span><span class="logic-index">02/LIQUIDITY</span></div><div class="logic-subtitle">流動性門檻</div><div class="logic-desc">近20日平均日成交量需大於 <span class="highlight">1,000張</span>。</div></div>
             <div class="logic-item"><div class="logic-header"><span class="logic-icon">📊</span><span class="logic-index">03/TRACKING</span></div><div class="logic-subtitle">雙週期比對</div><div class="logic-desc">股價 240 日與 20 日績效需 <span class="highlight">超越大盤同期</span>。</div></div>
@@ -135,8 +119,7 @@ if not st.session_state['scan_completed']:
         </div>"""
     else:
         TARGET_MODE = "dual_intersection"
-        logic_html = """
-        <div class="logic-grid">
+        logic_html = """<div class="logic-grid">
             <div class="logic-item"><div class="logic-header"><span class="logic-icon">🧬</span><span class="logic-index">01/INTERSECTION</span></div><div class="logic-subtitle">雙引擎交集</div><div class="logic-desc">自動抓出具備 <span class="highlight">營收創高</span> 與 <span class="highlight">技術強勢</span> 的標的。</div></div>
             <div class="logic-item"><div class="logic-header"><span class="logic-icon">👑</span><span class="logic-index">02/FUNDAMENTAL</span></div><div class="logic-subtitle">基本面護城河</div><div class="logic-desc">營收創 5 年新高，且近1季與 <span class="highlight">今年累計營收</span> 正成長。</div></div>
             <div class="logic-item"><div class="logic-header"><span class="logic-icon">📈</span><span class="logic-index">03/TECHNICAL</span></div><div class="logic-subtitle">技術面爆發</div><div class="logic-desc">均線多頭排列，且績效皆 <span class="highlight">超越大盤同期</span>。</div></div>
@@ -148,32 +131,47 @@ if not st.session_state['scan_completed']:
     _, btn_col, _ = st.columns([1, 2, 1])
     with btn_col:
         if st.button("🚀 啟動AI量化篩選", use_container_width=True):
-            with st.status("正在執行深度運算...", expanded=True) as status:
-                time.sleep(1.5)
+            with st.status("正在抓取量化資料庫...", expanded=True) as status:
                 try:
-                    url_1 = f"https://raw.githubusercontent.com/{GITHUB_USER}/{GITHUB_REPO}/main/daily_result.csv?t={int(time.time())}"
-                    url_2 = f"https://raw.githubusercontent.com/{GITHUB_USER}/{GITHUB_REPO}/main/momentum_result.csv?t={int(time.time())}"
+                    # 💡 增加 Timeout 至 30 秒，並增加時間戳防快取
+                    ts = int(time.time())
+                    url_1 = f"https://raw.githubusercontent.com/{GITHUB_USER}/{GITHUB_REPO}/main/daily_result.csv?t={ts}"
+                    url_2 = f"https://raw.githubusercontent.com/{GITHUB_USER}/{GITHUB_REPO}/main/momentum_result.csv?t={ts}"
+                    
                     if TARGET_MODE == "single_1":
-                        r = requests.get(url_1, timeout=10)
-                        df_f = pd.read_csv(io.StringIO(r.text)) if r.status_code == 200 else pd.DataFrame()
+                        r = requests.get(url_1, timeout=30)
+                        if r.status_code != 200: st.error("❌ GitHub 上找不到策略A的檔案，請先執行 Colab。"); st.stop()
+                        df_f = pd.read_csv(io.StringIO(r.text))
                     elif TARGET_MODE == "single_2":
-                        r = requests.get(url_2, timeout=10)
-                        df_f = pd.read_csv(io.StringIO(r.text)) if r.status_code == 200 else pd.DataFrame()
+                        r = requests.get(url_2, timeout=30)
+                        if r.status_code != 200: st.error("❌ GitHub 上找不到策略B的檔案，請先執行 Colab。"); st.stop()
+                        df_f = pd.read_csv(io.StringIO(r.text))
                     else:
-                        r1, r2 = requests.get(url_1, timeout=10), requests.get(url_2, timeout=10)
+                        status.write("📡 正在同步雙向大數據...")
+                        r1 = requests.get(url_1, timeout=30)
+                        r2 = requests.get(url_2, timeout=30)
                         if r1.status_code == 200 and r2.status_code == 200:
                             df1, df2 = pd.read_csv(io.StringIO(r1.text)), pd.read_csv(io.StringIO(r2.text))
-                            df_f = pd.merge(df1, df2[['股價代號', '240日報酬(%)', '20日報酬(%)', '近20日買超張數' if '近20日買超張數' in df2.columns else '近20日法人買賣超(張)']], on='股價代號', how='inner') if not df1.empty else pd.DataFrame()
-                        else: df_f = pd.DataFrame()
+                            # 確保股價代號為字串以利合併
+                            df1['股價代號'] = df1['股價代號'].astype(str)
+                            df2['股價代號'] = df2['股價代號'].astype(str)
+                            col_to_use = '近20日買超張數' if '近20日買超張數' in df2.columns else '近20日法人買賣超(張)'
+                            df_f = pd.merge(df1, df2[['股價代號', '240日報酬(%)', '20日報酬(%)', col_to_use]], on='股價代號', how='inner')
+                        else:
+                            st.error("❌ 無法從 GitHub 取得交集數據，請確認 Colab 已成功更新兩個檔案。"); st.stop()
 
                     if not df_f.empty:
                         df_f.index = range(1, len(df_f) + 1)
                         st.session_state['temp_df'] = df_f
                         st.session_state['selected_strategy'] = strategy_choice
                         st.session_state['scan_completed'] = True
-                        st.rerun()
-                    else: st.error("目前無符合標的。")
-                except: st.error("連線超時。")
+                        status.update(label="✅ 篩選成功", state="complete", expanded=False); st.rerun()
+                    else:
+                        st.warning("💡 目前市場中暫無符合此嚴苛條件的標的。")
+                except requests.exceptions.Timeout:
+                    st.error("⏰ 連線超時：GitHub 伺服器回應過慢，請稍後再試。")
+                except Exception as e:
+                    st.error(f"⚠️ 發生未知錯誤：{e}")
 else:
     m1, m2, m3 = st.columns(3)
     m1.metric("🎯 符合標的", f"{len(st.session_state['temp_df'])} 檔")
