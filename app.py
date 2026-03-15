@@ -118,7 +118,6 @@ def color_tw(val):
 # 💡 函數：策略 B & C 專用量子藍著色
 def color_tech_blue(val):
     if pd.isna(val) or not isinstance(val, (int, float)): return ''
-    # 只要是數據欄位，統一呈現亮麗的量子藍，不使用紅綠
     return 'color: #00f2ff; font-weight: 600; text-shadow: 0 0 5px rgba(0, 242, 255, 0.2);'
 
 if 'scan_completed' not in st.session_state: st.session_state['scan_completed'] = False
@@ -224,11 +223,16 @@ else:
     st.markdown(f"### 🏆 TOP PICKS : {st.session_state['selected_strategy']}")
     df = st.session_state['temp_df']
     
-    # 💡 核心優化：區分 A 策略與 BC 策略的著色
+    # 💡 核心優化：區分 A 策略與 BC 策略的著色，並在最右方加上「轉折值」
     if "A." in st.session_state['selected_strategy']:
         display_cols = ["股價代號", "公司名稱", "產業別", "現價", "季乖離", "年乖離", "月營收MoM(%)", "月營收YoY(%)", "今年以來累積營收YoY(%)", "近20日法人買賣超(張數)"]
         format_dict = {"現價": "{:.2f}", "季乖離": "{:.2f}%", "年乖離": "{:.2f}%", "月營收MoM(%)": "{:.2f}%", "月營收YoY(%)": "{:.2f}%", "今年以來累積營收YoY(%)": "{:.2f}%", "近20日法人買賣超(張數)": "{:,.0f}"}
         color_cols = ["季乖離", "年乖離", "月營收MoM(%)", "月營收YoY(%)", "今年以來累積營收YoY(%)", "近20日法人買賣超(張數)"]
+        
+        if "轉折值" in df.columns: 
+            display_cols.append("轉折值")
+            format_dict["轉折值"] = "{:.2f}"
+            
         styled_df = df[display_cols].style.format(format_dict, na_rep="-").map(color_tw, subset=color_cols)
         st.dataframe(styled_df, use_container_width=True)
         
@@ -245,7 +249,13 @@ else:
             format_dict = {"現價": "{:.2f}", "今年以來累積營收YoY(%)": "{:.2f}%", "240日報酬(%)": "{:+.2f}%", "20日報酬(%)": "{:+.2f}%", chip_col: "{:,.0f}"}
             color_cols = ['今年以來累積營收YoY(%)', '240日報酬(%)', '20日報酬(%)', chip_col]
         
-        # 💡 使用 color_tech_blue 函數，不使用紅綠色
+        # 動態加入轉折值並套用量子藍特效
+        if "轉折值" in df.columns:
+            df_display = df_display.copy()
+            df_display["轉折值"] = df["轉折值"]
+            format_dict["轉折值"] = "{:.2f}"
+            color_cols.append("轉折值")
+            
         styled_df = df_display.style.format(format_dict, na_rep="-").map(color_tech_blue, subset=color_cols)
         st.dataframe(styled_df, use_container_width=True)
 
