@@ -4,10 +4,11 @@ import yfinance as yf
 import datetime, requests, base64, io, time, os
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-# 從 GitHub Secrets 讀取 Token (安全做法)
+# 💡 從環境變數讀取你已有的 Secret
 GITHUB_TOKEN = os.getenv("GH_TOKEN")
+FM_TOKEN_1 = os.getenv("FM_TOKEN_1")
+FM_TOKEN_2 = os.getenv("FM_TOKEN_2")
 GITHUB_REPO = "chiachan0108/stock-data"
-FINMIND_TOKEN = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJkYXRlIjoiMjAyNi0wMy0xMSAxMjo1MToxNyIsInVzZXJfaWQiOiJjaGlhY2hhbiIsImVtYWlsIjoid3UuY2hpYWNoYW5AZ21haWwuY29tIiwiaXAiOiIxNTAuMTI5LjIyOC41NSJ9.RwJnd2AodazeuqXSuOK4vtB4fWeIEKycmyx116jbqMQ"
 
 def sync_to_github(df, filename):
     url = f"https://api.github.com/repos/{GITHUB_REPO}/contents/{filename}"
@@ -19,18 +20,17 @@ def sync_to_github(df, filename):
     if sha: payload["sha"] = sha
     requests.put(url, headers=headers, json=payload)
 
-def get_data():
-    # 策略 A/B/C 的計算邏輯整合
-    print("📡 正在獲取台股數據...")
-    # 這裡實作 get_pure_taiwan_stocks, yf.download 等邏輯...
-    # (為了節省篇幅，此處執行您先前已確認過的 A/B 策略運算)
+def run_quant_mission():
+    print("🚀 啟動量子量化雲端引擎...")
+    # --- 這裡放入你之前所有的策略運算邏輯 ---
+    # 策略 A 計算...
+    # 策略 B 計算...
+    # 策略 C 交集...
     
-    # 假設運算完成後產出 df_a, df_b
-    # df_c = pd.merge(df_a, df_b, on='股價代號', how='inner')
-    
-    # sync_to_github(df_a, "daily_result.csv")
-    # sync_to_github(df_b, "momentum_result.csv")
-    print("✅ 數據運算與同步完成")
+    # 範例測試 (確保連線成功)
+    heartbeat = pd.DataFrame([{"status": "Active", "last_run": str(datetime.datetime.now())}])
+    sync_to_github(heartbeat, "heartbeat.csv")
+    print("✅ 任務完成")
 
 if __name__ == "__main__":
-    get_data()
+    run_quant_mission()
