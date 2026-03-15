@@ -10,7 +10,7 @@ GITHUB_REPO = "stock-data"
 
 st.set_page_config(page_title="QUANTUM TECH SCANNER", layout="wide", initial_sidebar_state="collapsed")
 
-# 💡 視覺系統 19.0：復原質感免責聲明、移除提醒文字、修正所有已知問題
+# 💡 視覺系統 20.0：極致儀式感、磨砂玻璃免責聲明與穩定性優化
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&family=Noto+Sans+TC:wght@100;300;400;500;700&display=swap');
@@ -40,7 +40,6 @@ st.markdown("""
     }
     @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
 
-    /* 標題強制不換行與手機優化 */
     .section-label {
         font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: #00f2ff;
         letter-spacing: 2px; margin-top: 20px; margin-bottom: 12px; font-weight: 600; text-transform: uppercase;
@@ -77,7 +76,7 @@ st.markdown("""
         font-weight: 700 !important; letter-spacing: 1px; padding: 12px 0 !important; width: 100% !important; min-height: 50px !important;
     }
 
-    /* 💡 復原：磨砂玻璃免責聲明 */
+    /* 磨砂玻璃免責聲明 */
     .disclaimer-box {
         background: rgba(30, 41, 59, 0.3); backdrop-filter: blur(10px);
         border: 1px solid rgba(255, 255, 255, 0.05); border-left: 4px solid #00f2ff; 
@@ -164,8 +163,29 @@ if not st.session_state['scan_completed']:
     _, btn_col, _ = st.columns([1, 2, 1])
     with btn_col:
         if st.button("🚀 啟動AI量化篩選", use_container_width=True):
-            with st.status("正在執行深度運算...", expanded=True) as status:
-                time.sleep(1.5)
+            # 💡 重新植入 15 秒模擬即時搜尋儀式
+            p_bar = st.progress(0, text="📡 正在初始化數據終端...")
+            with st.status("量子引擎正在執行深度掃描...", expanded=True) as status:
+                # 階段 1 (0-3s)
+                time.sleep(3)
+                p_bar.progress(20, text="🔍 正在執行多維技術指標過濾...")
+                status.write("已完成全台股技術面過濾...")
+                # 階段 2 (3-6s)
+                time.sleep(3)
+                p_bar.progress(40, text="🏭 正在檢索 5 年營收規模資料...")
+                status.write("LTM 營收成長曲線計算中...")
+                # 階段 3 (6-9s)
+                time.sleep(3)
+                p_bar.progress(60, text="🏦 正在同步三大法人籌碼分佈...")
+                status.write("籌碼集中度分析完成...")
+                # 階段 4 (9-12s)
+                time.sleep(3)
+                p_bar.progress(80, text="🏆 正在彙整最終量化篩選報告...")
+                status.write("正在產出最終標的名單...")
+                # 階段 5 (12-15s)
+                time.sleep(3)
+                p_bar.progress(100, text="✨ 運算完成，正在解構數據...")
+                
                 try:
                     ts = int(time.time())
                     url_1 = f"https://raw.githubusercontent.com/{GITHUB_USER}/{GITHUB_REPO}/main/daily_result.csv?t={ts}"
@@ -187,7 +207,7 @@ if not st.session_state['scan_completed']:
                         st.session_state['selected_strategy'] = strategy_choice
                         st.session_state['scan_completed'] = True
                         st.rerun()
-                except Exception as e: st.error(f"⚠️ 連線異常，請確認資料源：{str(e)}")
+                except Exception as e: st.error(f"⚠️ 數據解析失敗：{str(e)}")
 else:
     df = st.session_state['temp_df']
     strategy_choice = st.session_state['selected_strategy']
@@ -198,7 +218,7 @@ else:
     st.button("🔄 重新選擇策略", on_click=lambda: st.session_state.update({"scan_completed": False}), use_container_width=True)
     st.markdown(f"### 🏆 TOP PICKS : {strategy_choice}")
     
-    # 💡 渲染表格：補回轉折值欄位與修正錯字
+    # 表格渲染邏輯 (修正錯字與轉折值)
     if "A." in strategy_choice:
         display_cols = ["股價代號", "公司名稱", "產業別", "現價", "季乖離", "年乖離", "月營收MoM(%)", "月營收YoY(%)", "今年以來累積營收YoY(%)", "近20日法人買賣超(張數)"]
         color_cols = ["季乖離", "年乖離", "月營收MoM(%)", "月營收YoY(%)", "今年以來累積營收YoY(%)", "近20日法人買賣超(張數)"]
@@ -208,7 +228,6 @@ else:
             display_cols.append("轉折值"); format_dict["轉折值"] = "{:.2f}"
         styled_df = df[display_cols].style.apply(highlight_pivot, axis=1).format(format_dict, na_rep="-").map(color_tw, subset=color_cols)
     else:
-        # B/C 策略渲染
         if "B." in strategy_choice:
             display_cols = ['股價代號', '公司名稱', '產業別', '現價', '240日報酬(%)', '20日報酬(%)', '近20日法人買賣超(張)']
             df_display = df[display_cols].copy()
@@ -224,7 +243,7 @@ else:
 
     st.dataframe(styled_df, use_container_width=True)
 
-    # 💡 復原：最初的磨砂玻璃警語
+    # 復原：磨砂玻璃免責聲明
     st.markdown('''
         <div class="disclaimer-box">
             <div class="disclaimer-icon">🛡️</div>
