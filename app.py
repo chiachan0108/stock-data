@@ -10,124 +10,103 @@ GITHUB_REPO = "stock-data"
 
 st.set_page_config(page_title="QUANTUM TECH SCANNER | 台股智能量化篩選", layout="wide", initial_sidebar_state="collapsed")
 
-# 💡 視覺系統 8.0：強制 4 欄排版、根除空白條、完美防裁切
+# 💡 視覺系統 9.0：一體化標題區、4欄定版邏輯、極致科技感
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600;700&family=Noto+Sans+TC:wght@100;300;400;500;700&display=swap');
     
-    /* 全域背景優化 */
     html, body, [class*="css"] { 
         font-family: 'Inter', 'Noto Sans TC', sans-serif !important; 
         background: radial-gradient(circle at 20% 20%, #1a202c 0%, #0b0f19 80%) !important;
         color: #e2e8f0 !important;
     }
 
-    /* 頂部標題與副標題 */
-    .title-wrapper { margin-top: 15px; margin-bottom: 0px; }
+    /* 💡 整合型頂部標題區：防止元件間距過大 */
+    .header-container {
+        margin-top: 10px;
+        margin-bottom: 5px;
+    }
     .main-title { 
         font-family: 'JetBrains Mono', monospace !important; font-weight: 700 !important; letter-spacing: -2px !important; 
         background: linear-gradient(90deg, #00f2ff 0%, #0072ff 100%);
         -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-        font-size: clamp(2.2rem, 7vw, 4rem) !important; line-height: 1.0 !important;
+        font-size: clamp(2.2rem, 7vw, 4rem) !important; line-height: 1.1 !important;
+        margin-bottom: 5px;
     }
     .sub-title {
-        font-family: 'Noto Sans TC', sans-serif !important; font-weight: 300 !important; font-size: clamp(1rem, 3vw, 1.4rem) !important;
-        color: #94a3b8; letter-spacing: 5px; margin-top: 10px; display: block; opacity: 0.8;
+        font-family: 'Noto Sans TC', sans-serif !important; font-weight: 300 !important; font-size: clamp(1rem, 3vw, 1.5rem) !important;
+        color: #94a3b8; letter-spacing: 5px; margin-bottom: 15px; display: block; opacity: 0.8;
     }
-
-    /* 💡 狀態標籤 (徹底優化底部間距) */
     .status-pill {
-        display: inline-flex; align-items: center; 
-        background: rgba(0, 242, 255, 0.05);
-        border: 1px solid rgba(0, 242, 255, 0.2); 
-        padding: 6px 18px; border-radius: 50px;
-        font-size: 0.85rem; color: #00f2ff; 
-        margin-top: 20px; margin-bottom: 10px; 
-        box-shadow: 0 0 20px rgba(0, 242, 255, 0.05);
+        display: inline-flex; align-items: center; background: rgba(0, 242, 255, 0.08);
+        border: 1px solid rgba(0, 242, 255, 0.3); padding: 6px 16px; border-radius: 50px;
+        font-size: 0.85rem; color: #00f2ff; margin-bottom: 15px;
     }
     .pulse-dot {
         height: 8px; width: 8px; background-color: #00f2ff; border-radius: 50%;
-        display: inline-block; margin-right: 12px; box-shadow: 0 0 12px #00f2ff;
+        display: inline-block; margin-right: 12px; box-shadow: 0 0 10px #00f2ff;
         animation: pulse 2s infinite;
     }
     @keyframes pulse {
         0% { transform: scale(0.9); opacity: 0.7; }
-        70% { transform: scale(1.1); opacity: 1; box-shadow: 0 0 15px #00f2ff; }
+        70% { transform: scale(1.1); opacity: 1; }
         100% { transform: scale(0.9); opacity: 0.7; }
     }
 
-    /* 欄位標題樣式 */
+    /* 💡 分隔標題 (強制貼合下拉選單) */
     .section-header {
-        font-family: 'JetBrains Mono', monospace !important; font-size: 0.85rem !important; letter-spacing: 3px !important;
-        color: #00f2ff; margin-top: 15px; margin-bottom: 10px; display: flex; align-items: center; font-weight: 600;
+        font-family: 'JetBrains Mono', monospace !important; font-size: 0.85rem !important; letter-spacing: 2px !important;
+        color: #00f2ff; margin-top: 15px; margin-bottom: 5px; display: flex; align-items: center; font-weight: 600;
+        opacity: 0.9;
     }
     .section-header::after {
         content: ""; flex: 1; height: 1px; background: linear-gradient(90deg, rgba(0, 242, 255, 0.3), transparent); margin-left: 20px;
     }
 
-    /* 💡 系統核心邏輯網格 (強制電腦版 1 排 4 個) */
+    /* 💡 強制電腦版 4 欄排版 */
     .logic-grid { 
-        display: grid; 
-        gap: 16px; 
-        /* 預設為手機版：1 欄 */
-        grid-template-columns: repeat(1, 1fr); 
-        margin-bottom: 30px;
+        display: grid; gap: 16px; 
+        grid-template-columns: repeat(1, 1fr); /* 手機預設 1 欄 */
+        margin-top: 10px; margin-bottom: 30px;
     }
-    /* 平板尺寸：2 欄 */
-    @media (min-width: 768px) {
-        .logic-grid { grid-template-columns: repeat(2, 1fr); }
-    }
-    /* 電腦尺寸：強制 4 欄 (策略A剛好 2 排) */
     @media (min-width: 1024px) {
-        .logic-grid { grid-template-columns: repeat(4, 1fr); }
+        .logic-grid { grid-template-columns: repeat(4, 1fr) !important; } /* 電腦版強制 4 欄 */
     }
 
     .logic-item { 
         background: linear-gradient(180deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.6) 100%); 
-        border: 1px solid rgba(148, 163, 184, 0.1); 
-        border-top: 2px solid rgba(0, 242, 255, 0.2);
+        border: 1px solid rgba(148, 163, 184, 0.1); border-top: 2px solid rgba(0, 242, 255, 0.2);
         border-radius: 16px; padding: 22px; transition: all 0.3s ease;
     }
     .logic-item:hover { 
-        transform: translateY(-5px); border-top: 2px solid #00f2ff;
-        background: rgba(30, 41, 59, 0.7);
+        transform: translateY(-5px); border-top: 2px solid #00f2ff; background: rgba(30, 41, 59, 0.7);
         box-shadow: 0 15px 30px -10px rgba(0, 242, 255, 0.15);
     }
-    .logic-header { display: flex; align-items: center; margin-bottom: 15px; gap: 10px; }
+    .logic-header { display: flex; align-items: center; margin-bottom: 12px; gap: 10px; }
     .logic-icon { font-size: 1.2rem; filter: drop-shadow(0 0 5px rgba(0, 242, 255, 0.3)); }
     .logic-index { font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: #00f2ff; font-weight: 600; margin: 0;}
     .logic-subtitle { font-size: 1.15rem; font-weight: 700; color: #ffffff; margin-bottom: 10px; }
     .logic-desc { font-size: 0.9rem; color: #94a3b8; line-height: 1.7; font-weight: 300; }
     .highlight { color: #ffffff; font-weight: 600; background: rgba(0, 242, 255, 0.1); padding: 2px 6px; border-radius: 4px; border-bottom: 1px solid #00f2ff; }
 
-    /* 💡 下拉選單終極修正 (防裁切 + 消除原生空白) */
-    div[data-testid="stSelectbox"] {
-        margin-top: -10px !important; /* 向上拉近，消除空白 */
-        margin-bottom: 15px !important;
-    }
-    div[data-testid="stSelectbox"] label {
-        display: none !important; /* 隱藏原生標籤所佔用的隱形空間 */
-    }
+    /* 💡 下拉選單修正 (移除上方標籤空白) */
+    div[data-testid="stSelectbox"] { margin-top: -10px !important; margin-bottom: 20px !important; }
+    div[data-testid="stSelectbox"] label { display: none !important; }
+    
     .stSelectbox [data-baseweb="select"] {
-        background: linear-gradient(145deg, rgba(30, 41, 59, 0.6) 0%, rgba(15, 23, 42, 0.8) 100%) !important;
+        background: rgba(15, 23, 42, 0.8) !important;
         border-radius: 14px !important; border: 1px solid rgba(0, 242, 255, 0.3) !important;
-        min-height: 56px !important; 
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
+        min-height: 56px !important;
     }
     .stSelectbox div[data-baseweb="select"] > div {
-        line-height: 2.2 !important; /* 防裁切關鍵 */
-        padding: 0 10px !important;
-        font-size: 1.05rem !important;
-        overflow: visible !important; /* 防裁切關鍵 */
+        line-height: 2.2 !important; padding: 0 10px !important; font-size: 1.05rem !important; overflow: visible !important;
     }
 
-    /* 免責聲明 */
+    /* 免責聲明與按鈕 */
     .disclaimer-box {
         background: rgba(30, 41, 59, 0.4); border-left: 4px solid #334155; padding: 20px;
         border-radius: 12px; margin: 40px 0; font-size: 0.9rem; color: #64748b; line-height: 1.7;
     }
-
-    /* 漸層啟動按鈕 */
     .stButton > button {
         background: linear-gradient(90deg, #00f2ff 0%, #0072ff 100%) !important;
         color: white !important; border: none !important; border-radius: 14px !important; 
@@ -136,11 +115,6 @@ st.markdown("""
         width: 100% !important; min-height: 55px !important; transition: all 0.3s ease !important;
     }
     .stButton > button:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(0, 242, 255, 0.4) !important; filter: brightness(1.1); }
-    
-    /* 移除 Streamlit 原生的區塊間距 */
-    div[data-testid="stVerticalBlock"] > div {
-        margin-bottom: 0 !important;
-    }
     </style>
 """, unsafe_allow_html=True)
 
@@ -150,36 +124,34 @@ if 'scan_completed' not in st.session_state: st.session_state['scan_completed'] 
 now_taipei = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=8)
 data_date = now_taipei.strftime('%Y-%m-%d') if now_taipei.hour >= 20 else (now_taipei - datetime.timedelta(days=1)).strftime('%Y-%m-%d')
 
-# --- 頂部區塊 (標題 + 狀態 + 策略選取標題 統一合併避免斷層) ---
+# --- 💡 一體化頂部渲染區 (標題 + 狀態 + 策略標題) ---
 st.markdown(f'''
-    <div class="title-wrapper">
+    <div class="header-container">
         <h1 class="main-title">QUANTUM SCANNER</h1>
         <span class="sub-title">台股智能量化篩選系統</span>
-    </div>
-    <div class="status-pill">
-        <span class="pulse-dot"></span>
-        每日 20:00 更新資料庫 &nbsp; | &nbsp; 最後更新日：{data_date}
-    </div>
-    <div class='section-header'>
-        STRATEGY CONFIGURATION 策略選取
+        <div class="status-pill">
+            <span class="pulse-dot"></span>
+            每日 20:00 更新資料庫 &nbsp; | &nbsp; 最後更新日：{data_date}
+        </div>
+        <div class="section-header">STRATEGY CONFIGURATION 策略選取</div>
     </div>
 ''', unsafe_allow_html=True)
 
-# --- 策略選取下拉選單 (無縫接軌) ---
+# --- 策略選取下拉選單 ---
 if not st.session_state['scan_completed']:
     strategy_options = ["A. 營收動能型 (基本面優先)", "B. 股價動能型 (技術面優先)", "C. 營收、股價動能雙吻合"]
     strategy_choice = st.selectbox("量化策略模組", strategy_options, label_visibility="collapsed")
     
     st.markdown("<div class='section-header'>SYSTEM ARCHITECTURE 系統核心邏輯</div>", unsafe_allow_html=True)
 
-    # 動態邏輯說明
+    # 定義邏輯 HTML
     if "A." in strategy_choice:
         TARGET_MODE = "single_1"
         logic_html = """
         <div class="logic-grid">
             <div class="logic-item"><div class="logic-header"><span class="logic-icon">🎯</span><span class="logic-index">01/SCOPE</span></div><div class="logic-subtitle">選股範圍</div><div class="logic-desc">鎖定台灣全體上市櫃<span class="highlight">電子產業</span>標的。</div></div>
             <div class="logic-item"><div class="logic-header"><span class="logic-icon">🌊</span><span class="logic-index">02/LIQUIDITY</span></div><div class="logic-subtitle">流動性門檻</div><div class="logic-desc">近20日平均日成交量需大於 <span class="highlight">1,000張</span>。</div></div>
-            <div class="logic-item"><div class="logic-header"><span class="logic-icon">⚖️</span><span class="logic-index">03/LEVEL</span></div><div class="logic-subtitle">技術位階</div><div class="logic-desc">股價需穩健站於長線生命線 <span class="highlight">MA240</span> 之上。</div></div>
+            <div class="logic-item"><div class="logic-header"><span class="logic-icon">📊</span><span class="logic-index">03/LEVEL</span></div><div class="logic-subtitle">技術位階</div><div class="logic-desc">股價需穩健站於長線生命線 <span class="highlight">MA240</span> 之上。</div></div>
             <div class="logic-item"><div class="logic-header"><span class="logic-icon">📈</span><span class="logic-index">04/TREND</span></div><div class="logic-subtitle">趨勢排列</div><div class="logic-desc"><span class="highlight">MA60 > MA240</span>，呈現多頭排列趨勢。</div></div>
             <div class="logic-item"><div class="logic-header"><span class="logic-icon">👑</span><span class="logic-index">05/SCALE</span></div><div class="logic-subtitle">營收規模</div><div class="logic-desc">近 12 個月累積營收 (LTM) 創下 <span class="highlight">5年來最高</span> 紀錄。</div></div>
             <div class="logic-item"><div class="logic-header"><span class="logic-icon">🔥</span><span class="logic-index">06/MOMENTUM</span></div><div class="logic-subtitle">創高動能</div><div class="logic-desc">近 6 個月內至少有單月營收創下 <span class="highlight">歷史新高</span>。</div></div>
@@ -200,7 +172,7 @@ if not st.session_state['scan_completed']:
         logic_html = """
         <div class="logic-grid">
             <div class="logic-item"><div class="logic-header"><span class="logic-icon">🧬</span><span class="logic-index">01/INTERSECTION</span></div><div class="logic-subtitle">雙引擎交集</div><div class="logic-desc">自動抓出同時具備 <span class="highlight">營收創高</span> 與 <span class="highlight">技術強勢</span> 的標的。</div></div>
-            <div class="logic-item"><div class="logic-header"><span class="logic-icon">👑</span><span class="logic-index">02/FUNDAMENTAL</span></div><div class="logic-subtitle">基本面護城河</div><div class="logic-desc">營收創 5 年新高，且近1季與 <span class="highlight">今年累計營收</span> 為正。</div></div>
+            <div class="logic-item"><div class="logic-header"><span class="logic-icon">👑</span><span class="logic-index">02/FUNDAMENTAL</span></div><div class="logic-subtitle">基本面護城河</div><div class="logic-desc">營收創 5 年新高，且近1季與 <span class="highlight">今年累計營收</span> 正成長。</div></div>
             <div class="logic-item"><div class="logic-header"><span class="logic-icon">📈</span><span class="logic-index">03/TECHNICAL</span></div><div class="logic-subtitle">技術面爆發</div><div class="logic-desc">均線多頭排列，且長短天期績效皆 <span class="highlight">超越大盤同期</span>。</div></div>
             <div class="logic-item"><div class="logic-header"><span class="logic-icon">🏦</span><span class="logic-index">04/SMART MONEY</span></div><div class="logic-subtitle">法人雙重認同</div><div class="logic-desc">確保近 <span class="highlight">20 日三大法人</span> 淨買超且營收正成長。</div></div>
         </div>"""
@@ -214,7 +186,7 @@ if not st.session_state['scan_completed']:
             with st.status("執行深度運算中...", expanded=True) as status:
                 steps = [(20, "🔍 初始化..."), (40, "📈 技術過濾..."), (60, "🏭 營收判定..."), (80, "👥 同步籌碼..."), (100, "🏆 完成")]
                 for p, txt in steps:
-                    time.sleep(2.0) 
+                    time.sleep(1.5) 
                     p_bar.progress(p, text=txt); status.write(txt)
                 try:
                     url_1 = f"https://raw.githubusercontent.com/{GITHUB_USER}/{GITHUB_REPO}/main/daily_result.csv?t={int(time.time())}"
@@ -241,7 +213,7 @@ if not st.session_state['scan_completed']:
                     else: st.error("目前無符合標的。")
                 except: st.error("數據獲取超時。")
 else:
-    # 顯示結果
+    # 顯示結果頁面
     df = st.session_state['temp_df']
     strategy_choice = st.session_state['selected_strategy']
     m1, m2, m3 = st.columns(3)
