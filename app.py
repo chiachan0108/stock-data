@@ -10,17 +10,17 @@ GITHUB_REPO = "stock-data"
 
 st.set_page_config(page_title="QUANTUM TECH SCANNER", layout="wide", initial_sidebar_state="collapsed")
 
-# 💡 視覺系統 14.0：解決手機標題換行問題、極致行動裝置優化
+# 💡 視覺系統 15.0：極致美化免責聲明、解決換行與裁切
 st.markdown("""
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@500;700&family=Noto+Sans+TC:wght@300;500;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&family=Noto+Sans+TC:wght@100;300;400;500;700&display=swap');
     
     html, body, [class*="css"] { 
         font-family: 'Inter', 'Noto Sans TC', sans-serif !important; 
         background-color: #0b0f19 !important; color: #e2e8f0 !important;
     }
 
-    /* 頂部標題區域緊湊化 */
+    /* 頂部標題區域 */
     .header-group { margin-top: -45px; margin-bottom: 10px; }
     .main-title { 
         font-family: 'JetBrains Mono', monospace !important; font-weight: 700; letter-spacing: -2px; 
@@ -41,24 +41,23 @@ st.markdown("""
     }
     @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
 
-    /* 💡 修正標題換行問題 */
+    /* 修正標題換行問題 */
     .section-label {
         font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: #00f2ff;
         letter-spacing: 2px; margin-top: 20px; margin-bottom: 12px; font-weight: 600; text-transform: uppercase;
         display: flex; align-items: center;
-        white-space: nowrap; /* 強制不換行 */
+        white-space: nowrap;
     }
     .section-label::after {
         content: ""; flex: 1; height: 1px; background: linear-gradient(90deg, rgba(0, 242, 255, 0.3), transparent); margin-left: 15px;
     }
 
-    /* 針對手機超小螢幕縮小字體防止溢出 */
     @media (max-width: 480px) {
         .section-label { font-size: 0.7rem !important; letter-spacing: 1px !important; }
     }
 
     /* 下拉選單 */
-    div[data-testid="stSelectbox"] { margin-top: -5px !important; margin-bottom: 25px !important; }
+    div[data-testid="stSelectbox"] { margin-top: -5px !important; margin-bottom: 20px !important; }
     div[data-testid="stSelectbox"] label { display: none !important; }
     .stSelectbox [data-baseweb="select"] {
         background-color: #161b2a !important; border: 1px solid rgba(0, 242, 255, 0.3) !important;
@@ -86,6 +85,30 @@ st.markdown("""
     .logic-desc { font-size: 0.85rem; color: #94a3b8; line-height: 1.6; }
     .highlight { color: #ffffff; font-weight: 600; background: rgba(0, 242, 255, 0.1); padding: 0 4px; border-bottom: 1px solid #00f2ff; }
 
+    /* 💡 極致美化：免責聲明區塊 (Glassmorphism) */
+    .disclaimer-box {
+        background: rgba(30, 41, 59, 0.3);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-left: 4px solid #00f2ff; /* 電光藍左邊框 */
+        padding: 24px;
+        border-radius: 12px;
+        margin: 40px 0;
+        display: flex;
+        align-items: flex-start;
+        gap: 16px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    }
+    .disclaimer-icon { font-size: 1.4rem; filter: drop-shadow(0 0 8px rgba(0, 242, 255, 0.4)); margin-top: -2px; }
+    .disclaimer-text {
+        font-size: 0.88rem;
+        color: #94a3b8;
+        line-height: 1.8;
+        letter-spacing: 0.5px;
+        font-weight: 400;
+    }
+    .disclaimer-bold { color: #f8fafc; font-weight: 600; margin-bottom: 4px; display: block; font-size: 0.95rem; }
+
     .stButton > button {
         background: linear-gradient(90deg, #00f2ff, #0072ff) !important;
         color: white !important; border: none !important; border-radius: 8px !important; 
@@ -99,7 +122,7 @@ if 'scan_completed' not in st.session_state: st.session_state['scan_completed'] 
 now_taipei = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=8)
 data_date = now_taipei.strftime('%Y-%m-%d') if now_taipei.hour >= 20 else (now_taipei - datetime.timedelta(days=1)).strftime('%Y-%m-%d')
 
-# 頂部整合渲染
+# 頂部渲染
 st.markdown(f'''
     <div class="header-group">
         <h1 class="main-title">QUANTUM SCANNER</h1>
@@ -124,7 +147,7 @@ if not st.session_state['scan_completed']:
             <div class="logic-item"><div class="logic-header"><span class="logic-icon">🎯</span><span class="logic-index">01/SCOPE</span></div><div class="logic-subtitle">選股範圍</div><div class="logic-desc">鎖定台灣上市櫃<span class="highlight">電子產業</span>標的。</div></div>
             <div class="logic-item"><div class="logic-header"><span class="logic-icon">🌊</span><span class="logic-index">02/LIQUIDITY</span></div><div class="logic-subtitle">流動性門檻</div><div class="logic-desc">近20日平均成交量需大於 <span class="highlight">1,000張</span>。</div></div>
             <div class="logic-item"><div class="logic-header"><span class="logic-icon">⚖️</span><span class="logic-index">03/LEVEL</span></div><div class="logic-subtitle">技術位階</div><div class="logic-desc">股價需穩健站於長線生命線 <span class="highlight">MA240</span> 之上。</div></div>
-            <div class="logic-item"><div class="logic-header"><span class="logic-index">04/TREND</span><span class="logic-icon">📈</span></div><div class="logic-subtitle">趨勢排列</div><div class="logic-desc"><span class="highlight">MA60 > MA240</span>，呈現多頭排列趨勢。</div></div>
+            <div class="logic-item"><div class="logic-header"><span class="logic-icon">📈</span><span class="logic-index">04/TREND</span></div><div class="logic-subtitle">趨勢排列</div><div class="logic-desc"><span class="highlight">MA60 > MA240</span>，呈現多頭排列趨勢。</div></div>
             <div class="logic-item"><div class="logic-header"><span class="logic-icon">👑</span><span class="logic-index">05/SCALE</span></div><div class="logic-subtitle">營收規模</div><div class="logic-desc">近 12 個月累積營收 (LTM) 創下 <span class="highlight">5年來最高</span>。</div></div>
             <div class="logic-item"><div class="logic-header"><span class="logic-icon">🔥</span><span class="logic-index">06/MOMENTUM</span></div><div class="logic-subtitle">創高動能</div><div class="logic-desc">近 6 個月內至少有單月營收創下 <span class="highlight">歷史新高</span>。</div></div>
             <div class="logic-item"><div class="logic-header"><span class="logic-icon">⚡</span><span class="logic-index">07/DYNAMICS</span></div><div class="logic-subtitle">雙重成長</div><div class="logic-desc">確保近1季 YoY > 0 且 <span class="highlight">今年累計 YoY > 0</span>。</div></div>
@@ -134,7 +157,7 @@ if not st.session_state['scan_completed']:
         TARGET_MODE = "single_2"
         logic_html = """<div class="logic-grid">
             <div class="logic-item"><div class="logic-header"><span class="logic-icon">🎯</span><span class="logic-index">01/SCOPE</span></div><div class="logic-subtitle">選股範圍</div><div class="logic-desc">全體上市櫃，嚴格排除 <span class="highlight">ETF、權證</span> 等非普通股。</div></div>
-            <div class="logic-item"><div class="logic-header"><span class="logic-index">🌊</span><span class="logic-index">02/LIQUIDITY</span></div><div class="logic-subtitle">流動性門檻</div><div class="logic-desc">近20日平均日成交量需大於 <span class="highlight">1,000張</span>。</div></div>
+            <div class="logic-item"><div class="logic-header"><span class="logic-icon">🌊</span><span class="logic-index">02/LIQUIDITY</span></div><div class="logic-subtitle">流動性門檻</div><div class="logic-desc">近20日平均日成交量需大於 <span class="highlight">1,000張</span>。</div></div>
             <div class="logic-item"><div class="logic-header"><span class="logic-icon">📊</span><span class="logic-index">03/TRACKING</span></div><div class="logic-subtitle">雙週期比對</div><div class="logic-desc">股價 240 日與 20 日績效需 <span class="highlight">超越大盤同期</span>。</div></div>
             <div class="logic-item"><div class="logic-header"><span class="logic-icon">🏦</span><span class="logic-index">04/SMART MONEY</span></div><div class="logic-subtitle">法人護航</div><div class="logic-desc">近 20 個交易日三大法人呈現 <span class="highlight">淨買超</span> 狀態。</div></div>
         </div>"""
@@ -173,11 +196,11 @@ if not st.session_state['scan_completed']:
                     if TARGET_MODE == "single_1":
                         r = requests.get(url_1, timeout=20)
                         if r.status_code == 200: df_f = pd.read_csv(io.StringIO(r.text))
-                        else: st.error("❌ 找不到策略A檔案，請檢查 Colab。"); st.stop()
+                        else: st.error("❌ 找不到策略A檔案。"); st.stop()
                     elif TARGET_MODE == "single_2":
                         r = requests.get(url_2, timeout=20)
                         if r.status_code == 200: df_f = pd.read_csv(io.StringIO(r.text))
-                        else: st.error("❌ 找不到策略B檔案，請檢查 Colab。"); st.stop()
+                        else: st.error("❌ 找不到策略B檔案。"); st.stop()
                     else:
                         r1, r2 = requests.get(url_1, timeout=20), requests.get(url_2, timeout=20)
                         if r1.status_code == 200 and r2.status_code == 200:
@@ -203,8 +226,10 @@ else:
     st.button("🔄 重新選擇策略", on_click=lambda: st.session_state.update({"scan_completed": False}), use_container_width=True)
     st.markdown(f"### 🏆 TOP PICKS : {st.session_state['selected_strategy']}")
     df = st.session_state['temp_df']
+    
+    # 渲染表格
     if "A." in st.session_state['selected_strategy']:
-        display_cols = ["股價代號", "公司名稱", "產業別", "現價", "季乖離", "年乖離", "月營收MoM(%)", "月營超YoY(%)", "今年以來累積營收YoY(%)", "近20日法人買賣超(張數)"]
+        display_cols = ["股價代號", "公司名稱", "產業別", "現價", "季乖離", "年乖離", "月營收MoM(%)", "月營收YoY(%)", "今年以來累積營收YoY(%)", "近20日法人買賣超(張數)"]
         st.dataframe(df[display_cols].style.format({"現價": "{:.2f}", "季乖離": "{:.2f}%", "年乖離": "{:.2f}%", "月營收MoM(%)": "{:.2f}%", "月營收YoY(%)": "{:.2f}%", "今年以來累積營收YoY(%)": "{:.2f}%", "近20日法人買賣超(張數)": "{:,.0f}"}), use_container_width=True)
     elif "B." in st.session_state['selected_strategy']:
         display_cols = ['股價代號', '公司名稱', '產業別', '現價', '240日報酬(%)', '20日報酬(%)', '近20日法人買賣超(張)']
@@ -214,7 +239,18 @@ else:
         chip_col = [c for c in df.columns if '法人' in c or '買超' in c][0]
         display_cols = ['股價代號', '公司名稱', '產業別', '現價', '今年以來累積營收YoY(%)', '240日報酬(%)', '20日報酬(%)', chip_col]
         st.dataframe(df[display_cols].style.format({"現價": "{:.2f}", "今年以來累積營收YoY(%)": "{:.2f}%", "240日報酬(%)": "{:+.2f}%", "20日報酬(%)": "{:+.2f}%", chip_col: "{:,.0f}"}), use_container_width=True)
-    st.markdown('''<div class="disclaimer-box"><b>💡 免責聲明：</b>篩選結果為量化運算，僅供參考不作為進出場依據，投資有風險請做好資金控管。</div>''', unsafe_allow_html=True)
+
+    # 💡 終極優化：質感免責聲明
+    st.markdown('''
+        <div class="disclaimer-box">
+            <div class="disclaimer-icon">🛡️</div>
+            <div class="disclaimer-text">
+                <span class="disclaimer-bold">重要免責聲明 (Legal Disclaimer)</span>
+                本系統篩選結果為大數據與量化模型之運算產出，內容僅供投資參考，不構成任何買賣建議或進出場依據。市場投資具有高度風險，使用者應進行獨立評估並做好個人資金與風險控管，本系統對任何投資損失不負法律責任。
+            </div>
+        </div>
+    ''', unsafe_allow_html=True)
+
     output = io.BytesIO()
     with pd.ExcelWriter(output, engine='xlsxwriter') as writer: df.to_excel(writer, index=False)
     st.download_button("📥 下載 Excel 數據報告", output.getvalue(), file_name=f"Quant_Report_{data_date}.xlsx")
