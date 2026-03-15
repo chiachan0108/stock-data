@@ -10,7 +10,7 @@ GITHUB_REPO = "stock-data"
 
 st.set_page_config(page_title="QUANTUM TECH SCANNER | 台股智能量化篩選", layout="wide", initial_sidebar_state="collapsed")
 
-# 💡 全新進化：針對行動裝置裁切問題的終極解決 CSS
+# 💡 視覺系統：含手機防裁切與高質感 UI
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600;700&family=Noto+Sans+TC:wght@100;300;400;500;700&display=swap');
@@ -21,7 +21,6 @@ st.markdown("""
         color: #e2e8f0 !important;
     }
     
-    /* 標題排版 (增加 clamp 優化響應式顯示) */
     .title-wrapper { margin-top: clamp(10px, 4vw, 20px); margin-bottom: 5px; }
     .main-title { 
         font-family: 'JetBrains Mono', monospace !important; font-weight: 700 !important; letter-spacing: -2px !important; 
@@ -34,7 +33,6 @@ st.markdown("""
         color: #94a3b8; letter-spacing: 4px; margin-top: 8px; display: block;
     }
 
-    /* 動態狀態標籤 */
     .status-pill {
         display: inline-flex; align-items: center; background: rgba(0, 242, 255, 0.05);
         border: 1px solid rgba(0, 242, 255, 0.2); padding: clamp(4px, 1.5vw, 6px) clamp(12px, 3vw, 16px); border-radius: 50px;
@@ -51,7 +49,6 @@ st.markdown("""
         100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 242, 255, 0); }
     }
 
-    /* 💡 策略選擇區：解決行動裝置裁切的終極解決方案 */
     .config-container {
         background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255, 255, 255, 0.05);
         border-radius: 20px; padding: clamp(16px, 5vw, 30px); margin-bottom: clamp(20px, 6vw, 40px); 
@@ -65,7 +62,6 @@ st.markdown("""
         content: ""; flex: 1; height: 1px; background: rgba(100, 116, 139, 0.2); margin-left: 15px;
     }
 
-    /* 邏輯卡片設計 (調整內距解決行動裝置問題) */
     .logic-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: clamp(12px, 4vw, 16px); }
     .logic-item { 
         background: linear-gradient(180deg, rgba(30, 41, 59, 0.5) 0%, rgba(15, 23, 42, 0.5) 100%); 
@@ -84,39 +80,28 @@ st.markdown("""
     .logic-desc { font-size: 0.85rem; color: #94a3b8; line-height: 1.6; font-weight: 300; }
     .highlight { color: #ffffff; font-weight: 600; background: rgba(0, 242, 255, 0.15); padding: 2px 6px; border-radius: 4px; border-bottom: 1px solid #00f2ff; }
 
-    /* 免責聲明 */
     .disclaimer-box {
         background: rgba(15, 23, 42, 0.6); border-left: 3px solid #334155; padding: clamp(12px, 4vw, 20px);
         border-radius: 8px; margin: clamp(20px, 6vw, 40px) 0; font-size: 0.8rem; color: #64748b; line-height: 1.6;
     }
 
-    /* 💡 下拉選單終極修正 (解決手機裁切問題) */
+    /* 下拉選單終極修正 (解決手機裁切問題) */
     .stSelectbox [data-baseweb="select"] {
         background-color: rgba(15, 23, 42, 0.7) !important;
         border-radius: 12px !important;
         border: 1px solid rgba(0, 242, 255, 0.3) !important;
-        min-height: 56px !important; /* 進一步增加高度 */
-        display: flex !important;
-        align-items: center !important; /* 強制垂直居中 */
+        min-height: 56px !important;
+        display: flex !important; align-items: center !important;
     }
     
-    /* 修正手機選單文字裁切，移除垂直邊距手動調整，強制固定行高與文字大小 */
     .stSelectbox div[data-baseweb="select"] > div {
-        line-height: 1.5 !important; /* 核心修正：行高固定為標準比例 */
-        padding-top: 0 !important; /* 移除原本的 padding-top 調整 */
-        padding-bottom: 0 !important; /* 移除原本的 padding-bottom 調整 */
-        display: flex !important;
-        align-items: center !important; /* 強制垂直居中 */
-        font-size: 0.95rem !important; /* 行動裝置稍微縮小字體確保安全顯示空間 */
-        text-align: left !important;
+        line-height: 1.5 !important; padding-top: 0 !important; padding-bottom: 0 !important;
+        display: flex !important; align-items: center !important;
+        font-size: 0.95rem !important; text-align: left !important;
     }
 
-    /* 行動裝置選取模式文字垂直居中 */
     @media (max-width: 768px) {
-        .stSelectbox div[data-baseweb="select"] > div {
-            font-size: 0.9rem !important; /* 手機端更安全的字體大小 */
-            line-height: 1.5 !important;
-        }
+        .stSelectbox div[data-baseweb="select"] > div { font-size: 0.9rem !important; line-height: 1.5 !important; }
     }
 
     /* 漸層按鈕 */
@@ -124,8 +109,7 @@ st.markdown("""
         background: linear-gradient(135deg, #00f2ff 0%, #0072ff 100%);
         color: white; border: none; border-radius: 12px; font-weight: 600; letter-spacing: 1px;
         padding: clamp(10px, 3vw, 14px) 24px; box-shadow: 0 4px 15px rgba(0, 114, 255, 0.3); transition: all 0.3s ease;
-        width: 100%;
-        min-height: 48px;
+        width: 100%; min-height: 48px;
     }
     .stButton > button:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0, 114, 255, 0.5); }
     </style>
@@ -160,7 +144,6 @@ if not st.session_state['scan_completed']:
     strategy_options = ["A. 營收動能型 (基本面優先)", "B. 股價動能型 (技術面優先)", "C. 營收、股價動能雙吻合"]
     strategy_choice = st.selectbox("量化策略模組", strategy_options, label_visibility="collapsed")
     
-    # 根據選擇顯示邏輯
     if "A." in strategy_choice:
         TARGET_MODE = "single_1"
         logic_html = """
@@ -169,9 +152,9 @@ if not st.session_state['scan_completed']:
             <div class="logic-item"><div class="logic-header"><span class="logic-icon">🌊</span><span class="logic-index">02 / LIQUIDITY</span></div><div class="logic-subtitle">流動性門檻</div><div class="logic-desc">近20日平均日成交量需大於 <span class="highlight">1,000張</span>。</div></div>
             <div class="logic-item"><div class="logic-header"><span class="logic-icon">📊</span><span class="logic-index">03 / LEVEL</span></div><div class="logic-subtitle">技術位階</div><div class="logic-desc">股價需穩健站於長線生命線 <span class="highlight">MA240</span> 之上。</div></div>
             <div class="logic-item"><div class="logic-header"><span class="logic-icon">📈</span><span class="logic-index">04 / TREND</span></div><div class="logic-subtitle">趨勢排列</div><div class="logic-desc"><span class="highlight">MA60 > MA240</span>，呈現多頭排列。</div></div>
-            <div class="logic-item"><div class="logic-index">05 / SCALE</div><div class="logic-subtitle">營收規模</div><div class="logic-desc">近 12 個月累積營收 (LTM) 創下 <span class="highlight">5年來最高紀錄</span>。</div></div>
-            <div class="logic-item"><div class="logic-index">06 / MOMENTUM</div><div class="logic-subtitle">創高動能</div><div class="logic-desc">近 6 個月內至少有單月營收創下 <span class="highlight">歷史新高</span>。</div></div>
-            <div class="logic-item"><div class="logic-index">07 / DYNAMICS</div><div class="logic-subtitle">雙重成長</div><div class="logic-desc">確保近1季 YoY > 0 且 <span class="highlight">今年累計 YoY > 0</span>。</div></div>
+            <div class="logic-item"><div class="logic-item"><div class="logic-header"><span class="logic-icon">👑</span><span class="logic-index">05 / SCALE</span></div><div class="logic-subtitle">營收規模</div><div class="logic-desc">近 12 個月累積營收 (LTM) 創下 <span class="highlight">5年來最高紀錄</span>。</div></div>
+            <div class="logic-item"><div class="logic-header"><span class="logic-icon">🔥</span><span class="logic-index">06 / MOMENTUM</span></div><div class="logic-subtitle">創高動能</div><div class="logic-desc">近 6 個月內至少有單月營收創下 <span class="highlight">歷史新高</span>。</div></div>
+            <div class="logic-item"><div class="logic-header"><span class="logic-icon">⚡</span><span class="logic-index">07 / DYNAMICS</span></div><div class="logic-subtitle">雙重成長</div><div class="logic-desc">確保近1季 YoY > 0 且 <span class="highlight">今年累計 YoY > 0</span>。</div></div>
             <div class="logic-item"><div class="logic-header"><span class="logic-icon">🏦</span><span class="logic-index">08 / TRACKING</span></div><div class="logic-subtitle">法人佈局</div><div class="logic-desc">追蹤近 <span class="highlight">20 日三大法人</span> 買賣超張數。</div></div>
         </div>"""
     elif "B." in strategy_choice:
@@ -200,8 +183,8 @@ if not st.session_state['scan_completed']:
 
     _, btn_col, _ = st.columns([1, 2, 1])
     with btn_col:
-        display_name = strategy_choice.split('. ')[1].split('(')[0].strip()
-        if st.button(f"🚀 啟動【{display_name}】AI量化篩選系統", use_container_width=True):
+        # 💡 統一按鈕文字為「🚀 啟動AI量化篩選」
+        if st.button("🚀 啟動AI量化篩選", use_container_width=True):
             p_bar = st.progress(0, text="📡 正在連接數據終端...")
             with st.status("正在執行深度運算...", expanded=True) as status:
                 steps = [(20, "🔍 初始化數據..."), (40, "📈 技術過濾..."), (60, "🏭 營收判定..."), (80, "👥 同步籌碼..."), (100, "🏆 產出報告...")]
