@@ -165,11 +165,11 @@ if not st.session_state['scan_completed']:
         if st.button("🚀 啟動AI量化篩選", use_container_width=True):
             # 💡 重新植入 15 秒模擬即時搜尋儀式
             p_bar = st.progress(0, text="📡 正在初始化數據終端...")
-            with st.status("量子引擎正在執行深度掃描...", expanded=True) as status:
+            with st.status("AI量化引擎執行深度掃描...", expanded=True) as status:
                 # 階段 1 (0-3s)
                 time.sleep(3)
                 p_bar.progress(20, text="🔍 正在執行多維技術指標過濾...")
-                status.write("已完成全台股技術面過濾...")
+                status.write("已完成標的技術面過濾...")
                 # 階段 2 (3-6s)
                 time.sleep(3)
                 p_bar.progress(40, text="🏭 正在檢索 5 年營收規模資料...")
