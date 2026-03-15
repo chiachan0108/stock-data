@@ -10,20 +10,17 @@ GITHUB_REPO = "stock-data"
 
 st.set_page_config(page_title="QUANTUM TECH SCANNER", layout="wide", initial_sidebar_state="collapsed")
 
-# 💡 視覺系統 10.0：終極修正裁切、消除空白、4欄位定版
+# 💡 視覺系統 11.0：全面 1000 張門檻、無縫對接、4欄定版
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@500;700&family=Noto+Sans+TC:wght@300;500;700&display=swap');
     
-    /* 全域背景 */
     html, body, [class*="css"] { 
         font-family: 'Inter', 'Noto Sans TC', sans-serif !important; 
-        background-color: #0b0f19 !important;
-        color: #e2e8f0 !important;
+        background-color: #0b0f19 !important; color: #e2e8f0 !important;
     }
 
-    /* 頂部標題與狀態區 */
-    .header-group { margin-top: -30px; margin-bottom: 10px; }
+    .header-group { margin-top: -30px; margin-bottom: 5px; }
     .main-title { 
         font-family: 'JetBrains Mono', monospace !important; font-weight: 700; letter-spacing: -2px; 
         background: linear-gradient(90deg, #00f2ff, #0072ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
@@ -34,7 +31,7 @@ st.markdown("""
     .status-pill {
         display: inline-flex; align-items: center; background: rgba(0, 242, 255, 0.05);
         border: 1px solid rgba(0, 242, 255, 0.2); padding: 5px 15px; border-radius: 50px;
-        font-size: 0.8rem; color: #00f2ff; margin-bottom: 20px;
+        font-size: 0.8rem; color: #00f2ff; margin-bottom: 10px;
     }
     .pulse-dot {
         height: 8px; width: 8px; background-color: #00f2ff; border-radius: 50%;
@@ -43,51 +40,31 @@ st.markdown("""
     }
     @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
 
-    /* 欄位標題與下拉選單 */
     .section-label {
         font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: #00f2ff;
-        letter-spacing: 2px; margin-bottom: 8px; font-weight: 600; text-transform: uppercase;
+        letter-spacing: 2px; margin-top: 15px; margin-bottom: 8px; font-weight: 600; text-transform: uppercase;
     }
 
-    /* 💡 下拉選單終極修復：解決文字裁切與奇怪色塊 */
-    div[data-testid="stSelectbox"] {
-        margin-top: -5px !important;
-        margin-bottom: 25px !important;
-    }
+    div[data-testid="stSelectbox"] { margin-top: -5px !important; margin-bottom: 20px !important; }
     div[data-testid="stSelectbox"] label { display: none !important; }
     
     .stSelectbox [data-baseweb="select"] {
-        background-color: #161b2a !important;
-        border: 1px solid rgba(0, 242, 255, 0.3) !important;
-        border-radius: 12px !important;
-        height: 52px !important; /* 固定高度 */
+        background-color: #161b2a !important; border: 1px solid rgba(0, 242, 255, 0.3) !important;
+        border-radius: 12px !important; height: 52px !important;
     }
     
-    /* 修正下拉選單內的文字裁切與垂直置中 */
     .stSelectbox div[data-baseweb="select"] > div {
-        font-size: 1rem !important;
-        padding-left: 15px !important;
-        height: 50px !important;
-        display: flex !important;
-        align-items: center !important; /* 核心修正：垂直居中 */
-        line-height: 1 !important;     /* 核心修正：移除過大的行高 */
+        font-size: 1rem !important; padding-left: 15px !important; height: 50px !important;
+        display: flex !important; align-items: center !important; line-height: 1 !important;
     }
 
-    /* 💡 系統邏輯 4 欄強制定版 */
-    .logic-grid { 
-        display: grid; gap: 15px; 
-        grid-template-columns: repeat(1, 1fr); /* 手機 1 欄 */
-        margin-bottom: 30px;
-    }
-    @media (min-width: 1024px) {
-        .logic-grid { grid-template-columns: repeat(4, 1fr) !important; } /* 電腦版強制 4 欄 */
-    }
+    /* 4 欄強制定版 */
+    .logic-grid { display: grid; gap: 15px; grid-template-columns: repeat(1, 1fr); margin-bottom: 30px; }
+    @media (min-width: 1024px) { .logic-grid { grid-template-columns: repeat(4, 1fr) !important; } }
 
     .logic-item { 
-        background: #161b22; 
-        border: 1px solid rgba(148, 163, 184, 0.15); 
-        border-top: 3px solid #00f2ff;
-        border-radius: 12px; padding: 20px; transition: 0.3s;
+        background: #161b22; border: 1px solid rgba(148, 163, 184, 0.15); 
+        border-top: 3px solid #00f2ff; border-radius: 12px; padding: 20px; transition: 0.3s;
     }
     .logic-item:hover { background: #1c2331; transform: translateY(-3px); }
     .logic-header { display: flex; align-items: center; margin-bottom: 12px; gap: 10px; }
@@ -97,28 +74,24 @@ st.markdown("""
     .logic-desc { font-size: 0.85rem; color: #94a3b8; line-height: 1.6; }
     .highlight { color: #ffffff; font-weight: 600; background: rgba(0, 242, 255, 0.1); padding: 0 4px; border-bottom: 1px solid #00f2ff; }
 
-    /* 免責聲明 */
     .disclaimer-box {
         background: rgba(30, 41, 59, 0.4); border-left: 4px solid #334155; padding: 15px;
         border-radius: 4px; margin: 30px 0; font-size: 0.85rem; color: #64748b;
     }
 
-    /* 按鈕樣式 */
     .stButton > button {
         background: linear-gradient(90deg, #00f2ff, #0072ff) !important;
         color: white !important; border: none !important; border-radius: 8px !important; 
-        font-weight: 700 !important; letter-spacing: 1px;
-        padding: 12px 0 !important; width: 100% !important; min-height: 50px !important;
+        font-weight: 700 !important; letter-spacing: 1px; padding: 12px 0 !important; width: 100% !important; min-height: 50px !important;
     }
     </style>
 """, unsafe_allow_html=True)
 
-# --- 數據基準日計算 ---
 if 'scan_completed' not in st.session_state: st.session_state['scan_completed'] = False
 now_taipei = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=8)
 data_date = now_taipei.strftime('%Y-%m-%d') if now_taipei.hour >= 20 else (now_taipei - datetime.timedelta(days=1)).strftime('%Y-%m-%d')
 
-# --- 頂部區塊 ---
+# 頂部整合渲染
 st.markdown(f'''
     <div class="header-group">
         <h1 class="main-title">QUANTUM SCANNER</h1>
@@ -131,7 +104,6 @@ st.markdown(f'''
     </div>
 ''', unsafe_allow_html=True)
 
-# --- 策略選取 ---
 if not st.session_state['scan_completed']:
     strategy_options = ["A. 營收動能型 (基本面優先)", "B. 股價動能型 (技術面優先)", "C. 營收、股價動能雙吻合"]
     strategy_choice = st.selectbox("量化策略模組", strategy_options, label_visibility="collapsed")
@@ -153,10 +125,11 @@ if not st.session_state['scan_completed']:
         </div>"""
     elif "B." in strategy_choice:
         TARGET_MODE = "single_2"
+        # 💡 已將說明同步調整為 1,000 張
         logic_html = """
         <div class="logic-grid">
             <div class="logic-item"><div class="logic-header"><span class="logic-icon">🎯</span><span class="logic-index">01/SCOPE</span></div><div class="logic-subtitle">選股範圍</div><div class="logic-desc">全體上市櫃，嚴格排除 <span class="highlight">ETF、權證</span> 等非普通股。</div></div>
-            <div class="logic-item"><div class="logic-header"><span class="logic-icon">🌊</span><span class="logic-index">02/LIQUIDITY</span></div><div class="logic-subtitle">流動性門檻</div><div class="logic-desc">近20日平均日成交量需大於 <span class="highlight">500張</span>。</div></div>
+            <div class="logic-item"><div class="logic-header"><span class="logic-icon">🌊</span><span class="logic-index">02/LIQUIDITY</span></div><div class="logic-subtitle">流動性門檻</div><div class="logic-desc">近20日平均日成交量需大於 <span class="highlight">1,000張</span>。</div></div>
             <div class="logic-item"><div class="logic-header"><span class="logic-icon">📊</span><span class="logic-index">03/TRACKING</span></div><div class="logic-subtitle">雙週期比對</div><div class="logic-desc">股價 240 日與 20 日績效需 <span class="highlight">超越大盤同期</span>。</div></div>
             <div class="logic-item"><div class="logic-header"><span class="logic-icon">🏦</span><span class="logic-index">04/SMART MONEY</span></div><div class="logic-subtitle">法人護航</div><div class="logic-desc">近 20 個交易日三大法人呈現 <span class="highlight">淨買超</span> 狀態。</div></div>
         </div>"""
@@ -176,7 +149,7 @@ if not st.session_state['scan_completed']:
     with btn_col:
         if st.button("🚀 啟動AI量化篩選", use_container_width=True):
             with st.status("正在執行深度運算...", expanded=True) as status:
-                time.sleep(2.0)
+                time.sleep(1.5)
                 try:
                     url_1 = f"https://raw.githubusercontent.com/{GITHUB_USER}/{GITHUB_REPO}/main/daily_result.csv?t={int(time.time())}"
                     url_2 = f"https://raw.githubusercontent.com/{GITHUB_USER}/{GITHUB_REPO}/main/momentum_result.csv?t={int(time.time())}"
@@ -190,7 +163,7 @@ if not st.session_state['scan_completed']:
                         r1, r2 = requests.get(url_1, timeout=10), requests.get(url_2, timeout=10)
                         if r1.status_code == 200 and r2.status_code == 200:
                             df1, df2 = pd.read_csv(io.StringIO(r1.text)), pd.read_csv(io.StringIO(r2.text))
-                            df_f = pd.merge(df1, df2[['股價代號', '240日報酬(%)', '20日報酬(%)', '近20日法人買賣超(張)']], on='股價代號', how='inner') if not df1.empty else pd.DataFrame()
+                            df_f = pd.merge(df1, df2[['股價代號', '240日報酬(%)', '20日報酬(%)', '近20日買超張數' if '近20日買超張數' in df2.columns else '近20日法人買賣超(張)']], on='股價代號', how='inner') if not df1.empty else pd.DataFrame()
                         else: df_f = pd.DataFrame()
 
                     if not df_f.empty:
@@ -222,7 +195,7 @@ else:
         display_cols = ['股價代號', '公司名稱', '產業別', '現價', '今年以來累積營收YoY(%)', '240日報酬(%)', '20日報酬(%)', '近20日法人買賣超(張)']
         st.dataframe(df[display_cols].style.format({"現價": "{:.2f}", "今年以來累積營收YoY(%)": "{:.2f}%", "240日報酬(%)": "{:+.2f}%", "20日報酬(%)": "{:+.2f}%", "近20日法人買賣超(張)": "{:,.0f}"}), use_container_width=True)
 
-    st.markdown('''<div class="disclaimer-box"><b>💡 投資叮嚀：</b>篩選結果為量化運算，僅供參考不作為進出場依據，請做好風險控管。</div>''', unsafe_allow_html=True)
+    st.markdown('''<div class="disclaimer-box"><b>💡 免責聲明：</b>篩選結果為大數據量化得出，僅供參考不作為進出場依據，投資有風險請做好自身資金控管。</div>''', unsafe_allow_html=True)
     output = io.BytesIO()
     with pd.ExcelWriter(output, engine='xlsxwriter') as writer: df.to_excel(writer, index=False)
     st.download_button("📥 下載 Excel 數據報告", output.getvalue(), file_name=f"Quant_Report_{data_date}.xlsx")
