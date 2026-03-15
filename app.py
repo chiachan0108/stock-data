@@ -140,8 +140,8 @@ if strategy_choice == "A. 營收動能型 (基本面優先)":
         <div class="logic-item"><div class="logic-index">04 / TREND</div><div class="logic-subtitle">趨勢排列</div><div class="logic-desc"><span class="highlight">MA60 > MA240</span>，呈現中長線多頭排列。</div></div>
         <div class="logic-item"><div class="logic-index">05 / SCALE</div><div class="logic-subtitle">營收規模</div><div class="logic-desc">近 12 個月累積營收 (LTM) 創下 <span class="highlight">5年來最高紀錄</span>。</div></div>
         <div class="logic-item"><div class="logic-index">06 / MOMENTUM</div><div class="logic-subtitle">創高動能</div><div class="logic-desc">近 6 個月內至少有單月營收創下 <span class="highlight">歷史新高</span>。</div></div>
-        <div class="logic-item"><div class="logic-index">07 / DYNAMICS</div><div class="logic-subtitle">季度動能</div><div class="logic-desc">確保 <span class="highlight">近1季 YoY > 0</span>，營運動能持續擴張。</div></div>
-        <div class="logic-item"><div class="logic-index">08 / TRACKING</div><div class="logic-subtitle">新版指標</div><div class="logic-desc">新增計算 <span class="highlight">今年以來累積營收 YoY(%)</span> 。</div></div>
+        <div class="logic-item"><div class="logic-index">07 / DYNAMICS</div><div class="logic-subtitle">雙重成長動能</div><div class="logic-desc">確保近1季 YoY > 0 且 <span class="highlight">今年累計 YoY > 0</span>。</div></div>
+        <div class="logic-item"><div class="logic-index">08 / TRACKING</div><div class="logic-subtitle">相對強弱判定</div><div class="logic-desc">更新三大法人籌碼並 <span class="highlight">判定相對大盤強弱</span>。</div></div>
     </div>
     """
 elif strategy_choice == "B. 股價動能型 (技術面優先)":
@@ -159,7 +159,7 @@ else:
     logic_html = """
     <div class="logic-grid">
         <div class="logic-item"><div class="logic-index">01 / INTERSECTION</div><div class="logic-subtitle">雙引擎交集</div><div class="logic-desc">系統自動比對，抓出同時具備 <span class="highlight">營收創高動能</span> 與 <span class="highlight">技術面強勢</span> 的標的。</div></div>
-        <div class="logic-item"><div class="logic-index">02 / FUNDAMENTAL</div><div class="logic-subtitle">基本面護城河</div><div class="logic-desc">近一年累積營收創 <span class="highlight">5 年新高</span>，且近1季營收正成長。</div></div>
+        <div class="logic-item"><div class="logic-index">02 / FUNDAMENTAL</div><div class="logic-subtitle">基本面護城河</div><div class="logic-desc">營收創 5 年新高，且近1季與 <span class="highlight">今年累計營收</span> 皆為正成長。</div></div>
         <div class="logic-item"><div class="logic-index">03 / TECHNICAL</div><div class="logic-subtitle">技術面爆發力</div><div class="logic-desc">均線多頭排列，且長短天期績效皆 <span class="highlight">超越大盤同期</span>。</div></div>
         <div class="logic-item"><div class="logic-index">04 / SMART MONEY</div><div class="logic-subtitle">法人雙重認同</div><div class="logic-desc">近 20 日與近 5 日三大法人皆呈現 <span class="highlight">買超挹注</span>。</div></div>
     </div>
@@ -205,7 +205,6 @@ if not st.session_state['scan_completed']:
                             df1 = pd.read_csv(io.StringIO(r1.text), on_bad_lines='skip')
                             df2 = pd.read_csv(io.StringIO(r2.text), on_bad_lines='skip')
                             if not df1.empty and not df2.empty:
-                                # 💡 修正合併金鑰：從 "代號" 改為 "股價代號"
                                 df1['股價代號'] = df1['股價代號'].astype(str)
                                 df2['股價代號'] = df2['股價代號'].astype(str)
                                 df_final = pd.merge(df1, df2[['股價代號', '240日報酬(%)', '20日報酬(%)', '近20日法人買賣超(張)']], on='股價代號', how='inner')
@@ -251,7 +250,6 @@ else:
     st.markdown("### 🏆 QUANTUM TOP PICKS")
     
     if not df.empty:
-        # 💡 使用全新欄位名稱進行格式化輸出
         if "A." in strategy_choice:
             display_cols_a = ["更新日期", "股價代號", "公司名稱", "產業別", "現價", "季乖離", "年乖離", "月營收MoM(%)", "月營收YoY(%)", "今年以來累積營收YoY(%)"]
             existing_cols_a = [c for c in display_cols_a if c in df.columns]
