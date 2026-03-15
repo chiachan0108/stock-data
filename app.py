@@ -74,6 +74,7 @@ strategy_options = [
 ]
 st.markdown("### ⚙️ STRATEGY CONFIGURATION")
 
+# 下拉選單在掃描完成後會鎖定
 strategy_choice = st.selectbox(
     "請選擇量化策略模組", 
     strategy_options, 
@@ -107,12 +108,13 @@ elif strategy_choice == "B. 股價動能型 (技術面優先)":
     """
 else:
     TARGET_MODE = "dual_intersection"
+    # 💡 依照您的需求更新 C 選項 04 的文字敘述
     logic_html = """
     <div class="logic-grid">
         <div class="logic-item"><div class="logic-index">01 / INTERSECTION</div><div class="logic-subtitle">雙引擎交集</div><div class="logic-desc">系統自動比對，抓出同時具備 <span class="highlight">營收創高動能</span> 與 <span class="highlight">技術面強勢</span> 的標的。</div></div>
         <div class="logic-item"><div class="logic-index">02 / FUNDAMENTAL</div><div class="logic-subtitle">基本面護城河</div><div class="logic-desc">營收創 5 年新高，且近1季與 <span class="highlight">今年累計營收</span> 皆為正成長。</div></div>
         <div class="logic-item"><div class="logic-index">03 / TECHNICAL</div><div class="logic-subtitle">技術面爆發力</div><div class="logic-desc">均線多頭排列，且長短天期績效皆 <span class="highlight">超越大盤同期</span>。</div></div>
-        <div class="logic-item"><div class="logic-index">04 / SMART MONEY</div><div class="logic-subtitle">法人雙重認同</div><div class="logic-desc">確保近期 <span class="highlight">20 日三大法人</span> 買賣超皆為正成長。</div></div>
+        <div class="logic-item"><div class="logic-index">04 / SMART MONEY</div><div class="logic-subtitle">法人雙重認同</div><div class="logic-desc">近 <span class="highlight">20 日三大法人</span> 淨買超且營收為正成長。</div></div>
     </div>
     """
 
@@ -153,7 +155,7 @@ if not st.session_state['scan_completed']:
                         else: df_final = pd.DataFrame()
 
                     if not df_final.empty:
-                        # 💡 核心優化：將索引從 1 開始
+                        # 索引從 1 開始
                         df_final.index = range(1, len(df_final) + 1)
                         st.session_state['temp_df'] = df_final
                         st.session_state['scan_completed'] = True
@@ -190,27 +192,15 @@ else:
             }, na_rep="-"), use_container_width=True)
             
         elif "B." in strategy_choice:
-            # 💡 依照要求調整 B 方案順序並更名
             display_cols_b = ['股價代號', '公司名稱', '產業別', '現價', '240日報酬(%)', '20日報酬(%)', '近20日法人買賣超(張)']
-            df_b_display = df[display_cols_b].rename(columns={
-                '240日報酬(%)': '近240日報酬(%)',
-                '20日報酬(%)': '近20日報酬(%)',
-                '近20日法人買賣超(張)': '近20日法人買超張數'
-            })
-            st.dataframe(df_b_display.style.format({
-                "現價": "{:.2f}", "近240日報酬(%)": "{:+.2f}%", "近20日報酬(%)": "{:+.2f}%", 
-                "近20日法人買超張數": "{:,.0f}"
-            }, na_rep="-"), use_container_width=True)
+            df_b_display = df[display_cols_b].rename(columns={'240日報酬(%)': '近240日報酬(%)', '20日報酬(%)': '近20日報酬(%)', '近20日法人買賣超(張)': '近20日法人買超張數'})
+            st.dataframe(df_b_display.style.format({"現價": "{:.2f}", "近240日報酬(%)": "{:+.2f}%", "近20日報酬(%)": "{:+.2f}%", "近20日法人買超張數": "{:,.0f}"}, na_rep="-"), use_container_width=True)
             
         else:
-            # C 方案
             display_cols_c = ['股價代號', '公司名稱', '產業別', '現價', '今年以來累積營收YoY(%)', '240日報酬(%)', '20日報酬(%)', '近20日法人買賣超(張)']
-            st.dataframe(df[display_cols_c].style.format({
-                "現價": "{:.2f}", "今年以來累積營收YoY(%)": "{:.2f}%", "240日報酬(%)": "{:+.2f}%", "20日報酬(%)": "{:+.2f}%",
-                "近20日法人買賣超(張)": "{:,.0f}"
-            }, na_rep="-"), use_container_width=True)
+            st.dataframe(df[display_cols_c].style.format({"現價": "{:.2f}", "今年以來累積營收YoY(%)": "{:.2f}%", "240日報酬(%)": "{:+.2f}%", "20日報酬(%)": "{:+.2f}%", "近20日法人買賣超(張)": "{:,.0f}"}, na_rep="-"), use_container_width=True)
     else:
-        st.info("💡 目前暫無符合條件的標的，請靜候市場輪動。")
+        st.info("💡 目前暫無同時符合兩大嚴苛策略的交集標的，請靜候市場輪動。")
     
     if not df.empty:
         output = io.BytesIO()
