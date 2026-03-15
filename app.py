@@ -10,35 +10,35 @@ GITHUB_REPO = "stock-data"
 
 st.set_page_config(page_title="QUANTUM TECH SCANNER | 台股智能量化篩選", layout="wide", initial_sidebar_state="collapsed")
 
-# 💡 視覺進化：解決手機字體裁切與 UI 優化
+# 💡 全新進化：針對行動裝置裁切問題的終極解決 CSS
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600;700&family=Noto+Sans+TC:wght@100;300;400;500;700&display=swap');
     
     html, body, [class*="css"] { 
-        font-family: 'Inter', 'Noto Sans TC', sans-serif; 
-        background: radial-gradient(circle at top right, #1a202c, #0b0f19);
-        color: #e2e8f0;
+        font-family: 'Inter', 'Noto Sans TC', sans-serif !important; 
+        background: radial-gradient(circle at top right, #1a202c, #0b0f19) !important;
+        color: #e2e8f0 !important;
     }
     
-    /* 標題排版 */
-    .title-wrapper { margin-top: 20px; margin-bottom: 5px; }
+    /* 標題排版 (增加 clamp 優化響應式顯示) */
+    .title-wrapper { margin-top: clamp(10px, 4vw, 20px); margin-bottom: 5px; }
     .main-title { 
-        font-family: 'JetBrains Mono', monospace; font-weight: 700; letter-spacing: -2px; 
+        font-family: 'JetBrains Mono', monospace !important; font-weight: 700 !important; letter-spacing: -2px !important; 
         background: linear-gradient(135deg, #00f2ff 0%, #0072ff 100%);
         -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-        font-size: clamp(2.5rem, 8vw, 4rem); line-height: 1.1;
+        font-size: clamp(2rem, 8vw, 4rem) !important; line-height: 1.1 !important;
     }
     .sub-title {
-        font-family: 'Noto Sans TC', sans-serif; font-weight: 300; font-size: clamp(1.1rem, 4vw, 1.5rem);
+        font-family: 'Noto Sans TC', sans-serif !important; font-weight: 300 !important; font-size: clamp(1rem, 4vw, 1.5rem) !important;
         color: #94a3b8; letter-spacing: 4px; margin-top: 8px; display: block;
     }
 
     /* 動態狀態標籤 */
     .status-pill {
         display: inline-flex; align-items: center; background: rgba(0, 242, 255, 0.05);
-        border: 1px solid rgba(0, 242, 255, 0.2); padding: 6px 16px; border-radius: 50px;
-        font-size: 0.8rem; color: #00f2ff; margin-bottom: 30px; margin-top: 20px;
+        border: 1px solid rgba(0, 242, 255, 0.2); padding: clamp(4px, 1.5vw, 6px) clamp(12px, 3vw, 16px); border-radius: 50px;
+        font-size: clamp(0.7rem, 2.5vw, 0.8rem); color: #00f2ff; margin-bottom: 30px; margin-top: 20px;
     }
     .pulse-dot {
         height: 8px; width: 8px; background-color: #00f2ff; border-radius: 50%;
@@ -51,67 +51,81 @@ st.markdown("""
         100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 242, 255, 0); }
     }
 
-    /* 💡 策略選擇區：解決手機裁切問題 */
+    /* 💡 策略選擇區：解決行動裝置裁切的終極解決方案 */
     .config-container {
         background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255, 255, 255, 0.05);
-        border-radius: 20px; padding: clamp(20px, 5vw, 30px); margin-bottom: 40px; 
+        border-radius: 20px; padding: clamp(16px, 5vw, 30px); margin-bottom: clamp(20px, 6vw, 40px); 
         box-shadow: inset 0 1px 1px rgba(255,255,255,0.05);
     }
     .section-header {
-        font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; letter-spacing: 2px;
-        color: #64748b; margin-bottom: 20px; display: flex; align-items: center;
+        font-family: 'JetBrains Mono', monospace !important; font-size: 0.8rem !important; letter-spacing: 2px !important;
+        color: #64748b; margin-bottom: 15px; display: flex; align-items: center;
     }
     .section-header::after {
-        content: ""; flex: 1; height: 1px; background: rgba(100, 116, 139, 0.2); margin-left: 20px;
+        content: ""; flex: 1; height: 1px; background: rgba(100, 116, 139, 0.2); margin-left: 15px;
     }
 
-    /* 邏輯卡片設計 */
-    .logic-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+    /* 邏輯卡片設計 (調整內距解決行動裝置問題) */
+    .logic-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: clamp(12px, 4vw, 16px); }
     .logic-item { 
         background: linear-gradient(180deg, rgba(30, 41, 59, 0.5) 0%, rgba(15, 23, 42, 0.5) 100%); 
         border: 1px solid rgba(148, 163, 184, 0.1); border-top: 3px solid rgba(0, 242, 255, 0.25);
-        border-radius: 16px; padding: 22px; transition: all 0.4s ease;
+        border-radius: 16px; padding: clamp(16px, 4vw, 22px); transition: all 0.4s ease;
     }
     .logic-item:hover { 
         transform: translateY(-5px); border-top: 3px solid #00f2ff;
         background: linear-gradient(180deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 0.8) 100%);
     }
     
-    .logic-header { display: flex; align-items: center; margin-bottom: 10px; gap: 8px; }
+    .logic-header { display: flex; align-items: center; margin-bottom: 8px; gap: 8px; }
     .logic-icon { font-size: 1.1rem; }
     .logic-index { font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: #00f2ff; opacity: 0.9; }
-    .logic-subtitle { font-size: 1.15rem; font-weight: 700; color: #ffffff; margin-bottom: 8px; }
-    .logic-desc { font-size: 0.9rem; color: #94a3b8; line-height: 1.6; font-weight: 300; }
+    .logic-subtitle { font-size: 1.1rem; font-weight: 700; color: #ffffff; margin-bottom: 6px; }
+    .logic-desc { font-size: 0.85rem; color: #94a3b8; line-height: 1.6; font-weight: 300; }
     .highlight { color: #ffffff; font-weight: 600; background: rgba(0, 242, 255, 0.15); padding: 2px 6px; border-radius: 4px; border-bottom: 1px solid #00f2ff; }
 
     /* 免責聲明 */
     .disclaimer-box {
-        background: rgba(15, 23, 42, 0.6); border-left: 3px solid #334155; padding: 20px;
-        border-radius: 8px; margin: 40px 0; font-size: 0.85rem; color: #64748b; line-height: 1.6;
+        background: rgba(15, 23, 42, 0.6); border-left: 3px solid #334155; padding: clamp(12px, 4vw, 20px);
+        border-radius: 8px; margin: clamp(20px, 6vw, 40px) 0; font-size: 0.8rem; color: #64748b; line-height: 1.6;
     }
 
-    /* 💡 下拉選單文字修正 (防裁切) */
+    /* 💡 下拉選單終極修正 (解決手機裁切問題) */
     .stSelectbox [data-baseweb="select"] {
         background-color: rgba(15, 23, 42, 0.7) !important;
         border-radius: 12px !important;
         border: 1px solid rgba(0, 242, 255, 0.3) !important;
-        min-height: 52px !important; /* 增加高度 */
+        min-height: 56px !important; /* 進一步增加高度 */
+        display: flex !important;
+        align-items: center !important; /* 強制垂直居中 */
     }
     
-    /* 修正手機選單文字垂直居中與裁切 */
+    /* 修正手機選單文字裁切，移除垂直邊距手動調整，強制固定行高與文字大小 */
     .stSelectbox div[data-baseweb="select"] > div {
-        line-height: 1.6 !important;
-        padding-top: 4px !important;
-        padding-bottom: 4px !important;
-        font-size: 1rem !important;
+        line-height: 1.5 !important; /* 核心修正：行高固定為標準比例 */
+        padding-top: 0 !important; /* 移除原本的 padding-top 調整 */
+        padding-bottom: 0 !important; /* 移除原本的 padding-bottom 調整 */
+        display: flex !important;
+        align-items: center !important; /* 強制垂直居中 */
+        font-size: 0.95rem !important; /* 行動裝置稍微縮小字體確保安全顯示空間 */
+        text-align: left !important;
+    }
+
+    /* 行動裝置選取模式文字垂直居中 */
+    @media (max-width: 768px) {
+        .stSelectbox div[data-baseweb="select"] > div {
+            font-size: 0.9rem !important; /* 手機端更安全的字體大小 */
+            line-height: 1.5 !important;
+        }
     }
 
     /* 漸層按鈕 */
     .stButton > button {
         background: linear-gradient(135deg, #00f2ff 0%, #0072ff 100%);
         color: white; border: none; border-radius: 12px; font-weight: 600; letter-spacing: 1px;
-        padding: 14px 24px; box-shadow: 0 4px 15px rgba(0, 114, 255, 0.3); transition: all 0.3s ease;
+        padding: clamp(10px, 3vw, 14px) 24px; box-shadow: 0 4px 15px rgba(0, 114, 255, 0.3); transition: all 0.3s ease;
         width: 100%;
+        min-height: 48px;
     }
     .stButton > button:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0, 114, 255, 0.5); }
     </style>
@@ -156,8 +170,8 @@ if not st.session_state['scan_completed']:
             <div class="logic-item"><div class="logic-header"><span class="logic-icon">📊</span><span class="logic-index">03 / LEVEL</span></div><div class="logic-subtitle">技術位階</div><div class="logic-desc">股價需穩健站於長線生命線 <span class="highlight">MA240</span> 之上。</div></div>
             <div class="logic-item"><div class="logic-header"><span class="logic-icon">📈</span><span class="logic-index">04 / TREND</span></div><div class="logic-subtitle">趨勢排列</div><div class="logic-desc"><span class="highlight">MA60 > MA240</span>，呈現多頭排列。</div></div>
             <div class="logic-item"><div class="logic-index">05 / SCALE</div><div class="logic-subtitle">營收規模</div><div class="logic-desc">近 12 個月累積營收 (LTM) 創下 <span class="highlight">5年來最高紀錄</span>。</div></div>
-            <div class="logic-item"><div class="logic-header"><span class="logic-icon">🔥</span><span class="logic-index">06 / MOMENTUM</span></div><div class="logic-subtitle">創高動能</div><div class="logic-desc">近 6 個月內至少有單月營收創下 <span class="highlight">歷史新高</span>。</div></div>
-            <div class="logic-item"><div class="logic-header"><span class="logic-icon">⚡</span><span class="logic-index">07 / DYNAMICS</span></div><div class="logic-subtitle">雙重成長</div><div class="logic-desc">確保近1季 YoY > 0 且 <span class="highlight">今年累計 YoY > 0</span>。</div></div>
+            <div class="logic-item"><div class="logic-index">06 / MOMENTUM</div><div class="logic-subtitle">創高動能</div><div class="logic-desc">近 6 個月內至少有單月營收創下 <span class="highlight">歷史新高</span>。</div></div>
+            <div class="logic-item"><div class="logic-index">07 / DYNAMICS</div><div class="logic-subtitle">雙重成長</div><div class="logic-desc">確保近1季 YoY > 0 且 <span class="highlight">今年累計 YoY > 0</span>。</div></div>
             <div class="logic-item"><div class="logic-header"><span class="logic-icon">🏦</span><span class="logic-index">08 / TRACKING</span></div><div class="logic-subtitle">法人佈局</div><div class="logic-desc">追蹤近 <span class="highlight">20 日三大法人</span> 買賣超張數。</div></div>
         </div>"""
     elif "B." in strategy_choice:
