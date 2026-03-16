@@ -10,7 +10,7 @@ GITHUB_REPO = "stock-data"
 
 st.set_page_config(page_title="QUANTUM TECH SCANNER", layout="wide", initial_sidebar_state="collapsed")
 
-# 💡 視覺系統 20.0：動態終端UI、極致儀式感、磨砂玻璃免責聲明
+# 💡 視覺系統 21.0：透析數據文案更新、結尾 2 秒定格優化
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&family=Noto+Sans+TC:wght@100;300;400;500;700&display=swap');
@@ -137,7 +137,7 @@ if not st.session_state['scan_completed']:
             <div class="logic-item"><div class="logic-header"><span class="logic-icon">⚖️</span><span class="logic-index">03/LEVEL</span></div><div class="logic-subtitle">技術位階</div><div class="logic-desc">股價需穩健站於長線生命線 <span class="highlight">MA240</span> 之上。</div></div>
             <div class="logic-item"><div class="logic-header"><span class="logic-icon">📈</span><span class="logic-index">04/TREND</span></div><div class="logic-subtitle">趨勢排列</div><div class="logic-desc"><span class="highlight">MA60 > MA240</span>，呈現多頭排列趨勢。</div></div>
             <div class="logic-item"><div class="logic-header"><span class="logic-icon">👑</span><span class="logic-index">05/SCALE</span></div><div class="logic-subtitle">營收規模</div><div class="logic-desc">近 12 個月累積營收 (LTM) 創下 <span class="highlight">5年來最高</span>。</div></div>
-            <div class="logic-item"><div class="logic-header"><span class="logic-icon">🔥</span><span class="logic-index">06/MOMENTUM</span></div><div class="logic-subtitle">創高動能</div><div class="logic-desc">近 6 個月內至少有單月營收創下 <span class="highlight">歷史新高</span>。</div></div>
+            <div class="logic-item"><div class="logic-header"><span class="logic-icon">🔥</span><span class="logic-index">06/MOMENTUM</span></div><div class="logic-subtitle">創高動能</div><div class="logic-desc">近 6 個月內至少有單月營營收創下 <span class="highlight">歷史新高</span>。</div></div>
             <div class="logic-item"><div class="logic-header"><span class="logic-icon">⚡</span><span class="logic-index">07/DYNAMICS</span></div><div class="logic-subtitle">雙重成長</div><div class="logic-desc">確保近1季 YoY > 0 且 <span class="highlight">今年累計 YoY > 0</span>。</div></div>
             <div class="logic-item"><div class="logic-header"><span class="logic-icon">🏦</span><span class="logic-index">08/TRACKING</span></div><div class="logic-subtitle">法人佈局</div><div class="logic-desc">追蹤近 <span class="highlight">20 日三大法人</span> 淨買賣超張數。</div></div>
         </div>"""
@@ -164,7 +164,7 @@ if not st.session_state['scan_completed']:
     with btn_col:
         if st.button("🚀 啟動AI量化篩選", use_container_width=True):
             
-            # 💡 動態生成專屬 15 秒科技終端掃描文案
+            # 💡 定義不同策略的 15 秒掃描提示詞
             if "A." in strategy_choice:
                 status_title = "🧬 AI 營收動能引擎執行深度掃描..."
                 steps = [
@@ -172,7 +172,7 @@ if not st.session_state['scan_completed']:
                     (40, "🏭 深度運算 5 年 LTM 營收成長曲線...", "<span style='color:#00f2ff; font-family:monospace;'>[SUCCESS]</span> <span style='color:#94a3b8;'>營收規模創高驗證完成...</span>"),
                     (60, "⚡ 驗證 YoY 雙重成長與財務護城河...", "<span style='color:#00f2ff; font-family:monospace;'>[SUCCESS]</span> <span style='color:#94a3b8;'>排除短期營收動能衰退標的...</span>"),
                     (80, "🏦 疊加近 20 日三大法人籌碼狀態...", "<span style='color:#00f2ff; font-family:monospace;'>[SUCCESS]</span> <span style='color:#94a3b8;'>籌碼集中度與聰明錢分析完成...</span>"),
-                    (100, "🏆 彙整基本面極端強勢名單...", "<span style='color:#00f2ff; font-family:monospace;'>[SYSTEM]</span> <span style='color:#e2e8f0; font-weight:600;'>量子運算結束，準備解構數據...</span>")
+                    (100, "🏆 彙整基本面極端強勢名單...", "<span style='color:#00f2ff; font-family:monospace;'>[SYSTEM]</span> <span style='color:#e2e8f0; font-weight:600;'>AI量化運算結束，準備透析最終數據...</span>")
                 ]
             elif "B." in strategy_choice:
                 status_title = "🚀 AI 股價動能引擎執行深度掃描..."
@@ -181,7 +181,7 @@ if not st.session_state['scan_completed']:
                     (40, "📈 展開 240 日與 20 日雙週期報酬計算...", "<span style='color:#00f2ff; font-family:monospace;'>[SUCCESS]</span> <span style='color:#94a3b8;'>動能基準線與歷史波動率建立中...</span>"),
                     (60, "⚔️ 對標大盤績效進行 Alpha 值剔除...", "<span style='color:#00f2ff; font-family:monospace;'>[SUCCESS]</span> <span style='color:#94a3b8;'>已鎖定具備相對超額報酬之標的...</span>"),
                     (80, "🏦 追蹤聰明錢流向與主力籌碼堆疊...", "<span style='color:#00f2ff; font-family:monospace;'>[SUCCESS]</span> <span style='color:#94a3b8;'>法人淨買超狀態確認完成...</span>"),
-                    (100, "🏆 彙整技術面極端強勢名單...", "<span style='color:#00f2ff; font-family:monospace;'>[SYSTEM]</span> <span style='color:#e2e8f0; font-weight:600;'>量子運算結束，準備解構數據...</span>")
+                    (100, "🏆 彙整技術面極端強勢名單...", "<span style='color:#00f2ff; font-family:monospace;'>[SYSTEM]</span> <span style='color:#e2e8f0; font-weight:600;'>AI量化運算結束，準備透析最終數據...</span>")
                 ]
             else:
                 status_title = "🌌 量子雙引擎交集模組執行深度掃描..."
@@ -190,15 +190,18 @@ if not st.session_state['scan_completed']:
                     (40, "⚡ 執行營收創高與相對強勢碰撞測試...", "<span style='color:#00f2ff; font-family:monospace;'>[SUCCESS]</span> <span style='color:#94a3b8;'>核心條件交集過濾進行中...</span>"),
                     (60, "👑 提取雙重吻合之極端強勢標的...", "<span style='color:#00f2ff; font-family:monospace;'>[SUCCESS]</span> <span style='color:#94a3b8;'>勝率模型收斂，剔除單邊弱勢股...</span>"),
                     (80, "🏦 進行最終法人籌碼雙重認證...", "<span style='color:#00f2ff; font-family:monospace;'>[SUCCESS]</span> <span style='color:#94a3b8;'>聰明錢長短線佈局過濾完成...</span>"),
-                    (100, "🏆 彙整雙引擎最終交集名單...", "<span style='color:#00f2ff; font-family:monospace;'>[SYSTEM]</span> <span style='color:#e2e8f0; font-weight:600;'>量子運算結束，準備解構數據...</span>")
+                    (100, "🏆 彙整雙引擎最終交集名單...", "<span style='color:#00f2ff; font-family:monospace;'>[SYSTEM]</span> <span style='color:#e2e8f0; font-weight:600;'>AI量化運算結束，準備透析最終數據...</span>")
                 ]
 
             p_bar = st.progress(0, text="📡 正在初始化數據終端...")
             with st.status(status_title, expanded=True) as status:
                 for progress_val, bar_text, status_msg in steps:
-                    time.sleep(3) 
+                    time.sleep(3) # 每個階段 3 秒
                     p_bar.progress(progress_val, text=bar_text)
                     status.markdown(status_msg, unsafe_allow_html=True)
+                
+                # 💡 儀式感加強：出現最終文字後額外定格等待 2 秒
+                time.sleep(2)
                 
                 try:
                     ts = int(time.time())
@@ -221,8 +224,9 @@ if not st.session_state['scan_completed']:
                         st.session_state['selected_strategy'] = strategy_choice
                         st.session_state['scan_completed'] = True
                         st.rerun()
-                except Exception as e: st.error(f"⚠️ 連線異常，請確認資料源：{str(e)}")
+                except Exception as e: st.error(f"⚠️ 連線異常：{str(e)}")
 else:
+    # (此處保留原有結果渲染邏輯，代碼略...)
     df = st.session_state['temp_df']
     strategy_choice = st.session_state['selected_strategy']
     m1, m2, m3 = st.columns(3)
@@ -232,6 +236,7 @@ else:
     st.button("🔄 重新選擇策略", on_click=lambda: st.session_state.update({"scan_completed": False}), use_container_width=True)
     st.markdown(f"### 🏆 TOP PICKS : {strategy_choice}")
     
+    # 渲染 A 策略表格
     if "A." in strategy_choice:
         display_cols = ["股價代號", "公司名稱", "產業別", "現價", "季乖離", "年乖離", "月營收MoM(%)", "月營收YoY(%)", "今年以來累積營收YoY(%)", "近20日法人買賣超(張數)"]
         color_cols = ["季乖離", "年乖離", "月營收MoM(%)", "月營收YoY(%)", "今年以來累積營收YoY(%)", "近20日法人買賣超(張數)"]
@@ -241,6 +246,7 @@ else:
             display_cols.append("轉折值"); format_dict["轉折值"] = "{:.2f}"
         styled_df = df[display_cols].style.apply(highlight_pivot, axis=1).format(format_dict, na_rep="-").map(color_tw, subset=color_cols)
     else:
+        # 渲染 B/C 策略表格
         if "B." in strategy_choice:
             display_cols = ['股價代號', '公司名稱', '產業別', '現價', '240日報酬(%)', '20日報酬(%)', '近20日法人買賣超(張)']
             df_display = df[display_cols].copy()
@@ -268,4 +274,4 @@ else:
     
     st.download_button("📥 下載 Excel 數據報告", df.to_csv(index=False).encode('utf-8-sig'), file_name=f"Quant_Report_{data_date}.csv")
 
-st.divider(); st.caption("QUANTUM DATA SYSTEM © 2026 | CHIAFEIMAO Design. Maximum Insight.")
+st.divider(); st.caption("QUANTUM DATA SYSTEM © 2026 | Design IG:chiafeimao")
