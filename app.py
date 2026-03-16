@@ -132,12 +132,12 @@ if not st.session_state['scan_completed']:
     if "A." in strategy_choice:
         TARGET_MODE = "single_1"
         logic_html = """<div class="logic-grid">
-            <div class="logic-item"><div class="logic-header"><span class="logic-icon">🎯</span><span class="logic-index">01/SCOPE</span></div><div class="logic-subtitle">選股範圍</div><div class="logic-desc">鎖定台灣上市櫃<span class="highlight">電子產業</span>標的。</div></div>
+            <div class="logic-item"><div class="logic-header"><span class="logic-icon">🎯</span><span class="logic-index">01/SCOPE</span></div><div class="logic-subtitle">選股範圍</div><div class="logic-desc">鎖定台灣上市櫃<span class="highlight">普通股</span>標的。</div></div>
             <div class="logic-item"><div class="logic-header"><span class="logic-icon">🌊</span><span class="logic-index">02/LIQUIDITY</span></div><div class="logic-subtitle">流動性門檻</div><div class="logic-desc">近20日平均成交量需大於 <span class="highlight">1,000張</span>。</div></div>
             <div class="logic-item"><div class="logic-header"><span class="logic-icon">⚖️</span><span class="logic-index">03/LEVEL</span></div><div class="logic-subtitle">技術位階</div><div class="logic-desc">股價需穩健站於長線生命線 <span class="highlight">MA240</span> 之上。</div></div>
             <div class="logic-item"><div class="logic-header"><span class="logic-icon">📈</span><span class="logic-index">04/TREND</span></div><div class="logic-subtitle">趨勢排列</div><div class="logic-desc"><span class="highlight">MA60 > MA240</span>，呈現多頭排列趨勢。</div></div>
             <div class="logic-item"><div class="logic-header"><span class="logic-icon">👑</span><span class="logic-index">05/SCALE</span></div><div class="logic-subtitle">營收規模</div><div class="logic-desc">近 12 個月累積營收 (LTM) 創下 <span class="highlight">5年來最高</span>。</div></div>
-            <div class="logic-item"><div class="logic-header"><span class="logic-icon">🔥</span><span class="logic-index">06/MOMENTUM</span></div><div class="logic-subtitle">創高動能</div><div class="logic-desc">近 6 個月內至少有單月營營收創下 <span class="highlight">歷史新高</span>。</div></div>
+            <div class="logic-item"><div class="logic-header"><span class="logic-icon">🔥</span><span class="logic-index">06/MOMENTUM</span></div><div class="logic-subtitle">創高動能</div><div class="logic-desc">近 6 個月內至少有單月營收創下 <span class="highlight">歷史新高</span>。</div></div>
             <div class="logic-item"><div class="logic-header"><span class="logic-icon">⚡</span><span class="logic-index">07/DYNAMICS</span></div><div class="logic-subtitle">雙重成長</div><div class="logic-desc">確保近1季 YoY > 0 且 <span class="highlight">今年累計 YoY > 0</span>。</div></div>
             <div class="logic-item"><div class="logic-header"><span class="logic-icon">🏦</span><span class="logic-index">08/TRACKING</span></div><div class="logic-subtitle">法人佈局</div><div class="logic-desc">追蹤近 <span class="highlight">20 日三大法人</span> 淨買賣超張數。</div></div>
         </div>"""
@@ -168,7 +168,7 @@ if not st.session_state['scan_completed']:
             if "A." in strategy_choice:
                 status_title = "🧬 AI 營收動能引擎執行深度掃描..."
                 steps = [
-                    (20, "🔍 掃描電子產業長線多頭排列...", "<span style='color:#00f2ff; font-family:monospace;'>[SUCCESS]</span> <span style='color:#94a3b8;'>鎖定 MA60 > MA240 技術位階...</span>"),
+                    (20, "🔍 掃描全市場普通股長線多頭排列...", "<span style='color:#00f2ff; font-family:monospace;'>[SUCCESS]</span> <span style='color:#94a3b8;'>鎖定 MA60 > MA240 技術位階...</span>"),
                     (40, "🏭 深度運算 5 年 LTM 營收成長曲線...", "<span style='color:#00f2ff; font-family:monospace;'>[SUCCESS]</span> <span style='color:#94a3b8;'>營收規模創高驗證完成...</span>"),
                     (60, "⚡ 驗證 YoY 雙重成長與財務護城河...", "<span style='color:#00f2ff; font-family:monospace;'>[SUCCESS]</span> <span style='color:#94a3b8;'>排除短期營收動能衰退標的...</span>"),
                     (80, "🏦 疊加近 20 日三大法人籌碼狀態...", "<span style='color:#00f2ff; font-family:monospace;'>[SUCCESS]</span> <span style='color:#94a3b8;'>籌碼集中度與聰明錢分析完成...</span>"),
@@ -224,9 +224,8 @@ if not st.session_state['scan_completed']:
                         st.session_state['selected_strategy'] = strategy_choice
                         st.session_state['scan_completed'] = True
                         st.rerun()
-                except Exception as e: st.error(f"⚠️ 連線異常：{str(e)}")
+                except Exception as e: st.error(f"⚠️ 連線異常，請確認資料源：{str(e)}")
 else:
-    # (此處保留原有結果渲染邏輯，代碼略...)
     df = st.session_state['temp_df']
     strategy_choice = st.session_state['selected_strategy']
     m1, m2, m3 = st.columns(3)
